@@ -1,4 +1,5 @@
 use springbook;
+
 drop table users;
 
 create table users(

@@ -8,16 +8,16 @@ import java.sql.SQLException;
 
 import springbook.user.domain.User;
 
-public abstract class UserDao {
+public class UserDao {
 
-	private SimpleConnectionMaker simpleConnectionMaker;
+	private ConnectionMaker connectionMaker;
 
-	public UserDao() {
-		simpleConnectionMaker = new SimpleConnectionMaker();
+	public UserDao(ConnectionMaker connectionMaker) {
+		this.connectionMaker = connectionMaker;
 	}
 
 	public void add(User user) throws SQLException, ClassNotFoundException {
-		Connection c = simpleConnectionMaker.makeNewConnection();
+		Connection c = connectionMaker.makeConnection();
 
 		PreparedStatement ps = c.prepareStatement("insert into users(id, name, password) values(?,?,?)");
 		ps.setString(1, user.getId());
@@ -31,7 +31,7 @@ public abstract class UserDao {
 	}
 
 	public User get(String id) throws ClassNotFoundException, SQLException {
-		Connection c = simpleConnectionMaker.makeNewConnection();
+		Connection c = connectionMaker.makeConnection();
 
 		PreparedStatement ps = c.prepareStatement("select * from users where id = ?");
 		ps.setString(1, id);
