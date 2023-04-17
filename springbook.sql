@@ -1,3 +1,10 @@
 use springbook;
+drop table users;
 
-select * from users;
+create table users(
+	id varchar(10) primary key,
+	name varchar(20) not null,
+	password varchar(10) not null
+);
+
+delete from users where id = 'whiteship' ;
