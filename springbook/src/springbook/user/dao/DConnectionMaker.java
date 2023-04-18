@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class DConnectionMaker implements ConnectionMaker{
+public class DConnectionMaker implements ConnectionMaker {
 
 	@Override
 	public Connection makeConnection() throws ClassNotFoundException, SQLException {
@@ -15,6 +15,5 @@ public class DConnectionMaker implements ConnectionMaker{
 		return c;
 
 	}
-	
 
 }

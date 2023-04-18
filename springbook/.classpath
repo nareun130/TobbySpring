@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
-		<attributes>
-			<attribute name="module" value="true"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="C:/nareun/TobbySpring/springbook/mysql-connector-j-8.0.32/mysql-connector-j-8.0.32/mysql-connector-j-8.0.32.jar"/>
+	<classpathentry kind="lib" path="C:/nareun/TobbySpring/springbook/com.springsource.net.sf.cglib-2.2.0.jar"/>
+	<classpathentry kind="lib" path="C:/nareun/TobbySpring/springbook/com.springsource.org.apache.commons.logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="C:/nareun/TobbySpring/springbook/spring-asm-3.0.7.RELEASE.jar"/>
+	<classpathentry kind="lib" path="C:/nareun/TobbySpring/springbook/spring-beans-3.0.7.RELEASE.jar"/>
+	<classpathentry kind="lib" path="C:/nareun/TobbySpring/springbook/spring-context-3.0.7.RELEASE.jar"/>
+	<classpathentry kind="lib" path="C:/nareun/TobbySpring/springbook/spring-core-3.0.7.RELEASE.jar"/>
+	<classpathentry kind="lib" path="C:/nareun/TobbySpring/springbook/spring-expression-3.0.7.RELEASE.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
