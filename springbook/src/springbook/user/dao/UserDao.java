@@ -12,7 +12,8 @@ public class UserDao {
 
 	private ConnectionMaker connectionMaker;
 
-	public UserDao(ConnectionMaker connectionMaker) {
+	// 수정자 메소드 DI방식을 사용 -> DaoFactory의 코드도 수정해야 함.
+	public void setConnectionMaker(ConnectionMaker connectionMaker) {
 		this.connectionMaker = connectionMaker;
 	}
 
