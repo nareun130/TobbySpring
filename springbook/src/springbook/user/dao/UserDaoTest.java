@@ -16,16 +16,18 @@ public class UserDaoTest {
 		UserDao dao = context.getBean("userDao", UserDao.class);
 
 		User user = new User();
-		user.setId("whiteship4");
+		user.setId("whiteship5");
 		user.setName("백기선");
 		user.setPassword("married");
 
 		dao.add(user);
+		System.out.println(user.getId() + "등록 성공");
 
 		User user2 = dao.get(user.getId());
 
-		System.out.println(user2.getName() + "," + user2.getPassword());
-		System.out.println(user2.getId() + "조회 완료");
+		System.out.println(user2.getName());
+		System.out.println(user2.getPassword());
+		System.out.println(user2.getId() + "조회 성공");
 
 	}
 }
