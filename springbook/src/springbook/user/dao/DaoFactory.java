@@ -19,6 +19,7 @@ public class DaoFactory {
 	@Bean
 	public DataSource dataSource() {
 		SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
+		
 		dataSource.setDriverClass(com.mysql.cj.jdbc.Driver.class);
 		dataSource.setUrl("jdbc:mysql://localhost/springbook");
 		dataSource.setUsername("spring");
@@ -27,8 +28,4 @@ public class DaoFactory {
 		return dataSource;
 	}
 
-	@Bean
-	public ConnectionMaker realConnectionMaker() {
-		return new DConnectionMaker();
-	}
 }
