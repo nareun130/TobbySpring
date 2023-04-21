@@ -19,7 +19,7 @@ public class DaoFactory {
 	@Bean
 	public DataSource dataSource() {
 		SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
-		
+
 		dataSource.setDriverClass(com.mysql.cj.jdbc.Driver.class);
 		dataSource.setUrl("jdbc:mysql://localhost/springbook");
 		dataSource.setUsername("spring");
