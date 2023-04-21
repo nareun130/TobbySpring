@@ -66,7 +66,6 @@ public class UserDaoTest {
 
 		dao.deleteAll();
 		assertThat(dao.getCount(), is(0));
-
 		dao.add(user1);
 		assertThat(dao.getCount(), is(1));
 
