@@ -10,7 +10,6 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 
-import com.mysql.cj.xdevapi.PreparableStatement;
 
 import springbook.user.domain.User;
 
@@ -24,7 +23,7 @@ public class UserDao {
 
 	public void add(User user) throws SQLException, ClassNotFoundException {
 		Connection c = dataSource.getConnection();
-
+		
 		PreparedStatement ps = c.prepareStatement("insert into users(id, name, password) values(?,?,?)");
 		ps.setString(1, user.getId());
 		ps.setString(2, user.getName());
