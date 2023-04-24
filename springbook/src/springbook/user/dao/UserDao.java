@@ -15,33 +15,19 @@ import springbook.user.domain.User;
 public class UserDao {
 
 	private DataSource dataSource;
-
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
-	}
-
 	private JdbcContext jdbcContext;
 
-	public void setJdbcContext(JdbcContext jdcContext) {
-		this.jdbcContext = jdcContext;
+	public void setDataSource(DataSource dataSource) {
+		this.jdbcContext = new JdbcContext(); // jdbcContext를 생성
+		this.jdbcContext.setDataSource(dataSource); // 외존 오브젝트 주입
+		this.dataSource = dataSource;// 아직 jdbcContext를 적용하지 않은 메소드를 위해 저장해 둠.
 	}
 
 	public void add(final User user) throws SQLException, ClassNotFoundException {
 
 		// 익명 내부 클래스를 메소드 파라미터로 이전
-		this.jdbcContext.workWithStatementStrategy(new StatementStrategy() {
-
-			@Override
-			public PreparedStatement makePreparedStatemnet(Connection c) throws SQLException {
-				PreparedStatement ps = c.prepareStatement("insert into users(id,name,password) values(?,?,?)");
-				ps.setString(1, user.getId());
-				ps.setString(2, user.getName());
-				ps.setString(3, user.getPassword());
-
-				return ps;
-
-			}
-		});
+		this.jdbcContext.executeSql("insert into users(id,name,password) values(?,?,?)", user.getId(), user.getName(),
+				user.getPassword());
 	}
 
 	public User get(String id) throws ClassNotFoundException, SQLException {
@@ -71,13 +57,7 @@ public class UserDao {
 	}
 
 	public void deleteAll() throws SQLException {
-		this.jdbcContext.workWithStatementStrategy(new StatementStrategy() {
-
-			@Override
-			public PreparedStatement makePreparedStatemnet(Connection c) throws SQLException {
-				return c.prepareStatement("delete from users");
-			}
-		});
+		this.jdbcContext.executeSql("delete from users");
 	}
 
 	public int getCount() throws SQLException {

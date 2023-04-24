@@ -6,7 +6,6 @@
 	<!-- setDataSource를 나타내는 name ref는 매개변수로 받아오는 참조 변수 -->
 	<bean id="userDao" class="springbook.user.dao.UserDao">
 		<property name="dataSource" ref="dataSource" />
-		<property name="jdbcContext" ref="jdbcContext" />
 	</bean>
 	<bean id="dataSource"
 		class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
@@ -17,7 +16,4 @@
 		<property name="password" value="book" />
 	</bean>
 
-	<bean id="jdbcContext" class="springbook.user.dao.JdbcContext">
-		<property name="dataSource" ref="dataSource" />
-	</bean>
 </beans>

@@ -38,4 +38,24 @@ public class JdbcContext {
 		}
 	}
 
+	public void executeSql(final String... query) throws SQLException {
+		workWithStatementStrategy(new StatementStrategy() {
+
+			@Override
+			public PreparedStatement makePreparedStatemnet(Connection c) throws SQLException {
+				if (query.length == 1) {
+					return c.prepareStatement(query[0]);
+				} else {
+
+					PreparedStatement ps = c.prepareStatement(query[0]);
+					for (int i = 1; i < query.length; i++) {
+						ps.setString(i, query[i]);
+					}
+
+					return ps;
+				}
+
+			}
+		});
+	}
 }
