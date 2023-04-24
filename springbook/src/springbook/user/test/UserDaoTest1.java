@@ -1,4 +1,4 @@
-package springbook.user.dao;
+package springbook.user.test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -20,6 +20,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import springbook.user.dao.DaoFactory;
+import springbook.user.dao.UserDao;
 import springbook.user.domain.User;
 
 //스프링이 싱글톤 방식으로 빈의 오브젝트를 만든다는 것을 검증해보는 테스트

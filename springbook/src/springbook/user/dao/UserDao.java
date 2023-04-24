@@ -20,18 +20,22 @@ public class UserDao {
 		this.dataSource = dataSource;
 	}
 
-	public void add(User user) throws SQLException, ClassNotFoundException {
-		Connection c = dataSource.getConnection();
+	public void add(final User user) throws SQLException, ClassNotFoundException {
 
-		PreparedStatement ps = c.prepareStatement("insert into users(id, name, password) values(?,?,?)");
-		ps.setString(1, user.getId());
-		ps.setString(2, user.getName());
-		ps.setString(3, user.getPassword());
+		// 익명 내부 클래스를 메소드 파라미터로 이전
+		jdbcContextWithStatementStrategy(new StatementStrategy() {
 
-		ps.executeUpdate();
+			@Override
+			public PreparedStatement makePreparedStatemnet(Connection c) throws SQLException {
+				PreparedStatement ps = c.prepareStatement("insert into users(id,name,password) values(?,?,?)");
+				ps.setString(1, user.getId());
+				ps.setString(2, user.getName());
+				ps.setString(3, user.getPassword());
 
-		ps.close();
-		c.close();
+				return ps;
+
+			}
+		});
 	}
 
 	public User get(String id) throws ClassNotFoundException, SQLException {
@@ -60,15 +64,60 @@ public class UserDao {
 		return user;
 	}
 
-	
 	public void deleteAll() throws SQLException {
+		jdbcContextWithStatementStrategy(new StatementStrategy() {
+
+			@Override
+			public PreparedStatement makePreparedStatemnet(Connection c) throws SQLException {
+				return c.prepareStatement("delete from users");
+			}
+		});
+	}
+
+	public int getCount() throws SQLException {
+		Connection c = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			c = dataSource.getConnection();
+			ps = c.prepareStatement("select count(*) from users");
+			rs = ps.executeQuery();
+			rs.next();
+			return rs.getInt(1);
+
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+			if (ps != null) {
+				try {
+					ps.close();
+				} catch (SQLException e) {
+				}
+			}
+			if (c != null) {
+				try {
+					c.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+
+	}
+
+	// 컨텍스트의 핵심적인 내용을 잘 담고있는 메서드 -> deleteAll() 수정
+	public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException {
 		Connection c = null;
 		PreparedStatement ps = null;
 		try {
 			c = dataSource.getConnection();
-			ps = c.prepareStatement("delete from users ");
+			ps = stmt.makePreparedStatemnet(c);
 			ps.executeUpdate();
-
 		} catch (SQLException e) {
 			throw e;
 		} finally {
@@ -85,25 +134,5 @@ public class UserDao {
 				}
 			}
 		}
-
-		ps.close();
-		c.close();
-
-	}
-
-	public int getCount() throws SQLException {
-		Connection c = dataSource.getConnection();
-
-		PreparedStatement ps = c.prepareStatement("select count(*) from users");
-
-		ResultSet rs = ps.executeQuery();
-		rs.next();
-		int count = rs.getInt(1);
-
-		rs.close();
-		ps.close();
-		c.close();
-
-		return count;
 	}
 }
