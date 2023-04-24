@@ -20,10 +20,16 @@ public class UserDao {
 		this.dataSource = dataSource;
 	}
 
+	private JdbcContext jdbcContext;
+
+	public void setJdbcContext(JdbcContext jdcContext) {
+		this.jdbcContext = jdcContext;
+	}
+
 	public void add(final User user) throws SQLException, ClassNotFoundException {
 
 		// 익명 내부 클래스를 메소드 파라미터로 이전
-		jdbcContextWithStatementStrategy(new StatementStrategy() {
+		this.jdbcContext.workWithStatementStrategy(new StatementStrategy() {
 
 			@Override
 			public PreparedStatement makePreparedStatemnet(Connection c) throws SQLException {
@@ -65,7 +71,7 @@ public class UserDao {
 	}
 
 	public void deleteAll() throws SQLException {
-		jdbcContextWithStatementStrategy(new StatementStrategy() {
+		this.jdbcContext.workWithStatementStrategy(new StatementStrategy() {
 
 			@Override
 			public PreparedStatement makePreparedStatemnet(Connection c) throws SQLException {
@@ -110,29 +116,4 @@ public class UserDao {
 
 	}
 
-	// 컨텍스트의 핵심적인 내용을 잘 담고있는 메서드 -> deleteAll() 수정
-	public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException {
-		Connection c = null;
-		PreparedStatement ps = null;
-		try {
-			c = dataSource.getConnection();
-			ps = stmt.makePreparedStatemnet(c);
-			ps.executeUpdate();
-		} catch (SQLException e) {
-			throw e;
-		} finally {
-			if (ps != null) {
-				try {
-					ps.close();
-				} catch (SQLException e) {
-				}
-			}
-			if (c != null) {
-				try {
-					c.close();
-				} catch (SQLException e) {
-				}
-			}
-		}
-	}
 }

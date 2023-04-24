@@ -21,19 +21,23 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import springbook.user.domain.User;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = "/test-applicationContext.xml")
+@DirtiesContext
 public class UserDaoTest {
 
-	UserDao dao;
+	@Autowired
+	ApplicationContext context;
+
+	private UserDao dao;
 
 	private User user1;
 	private User user2;
 	private User user3;
 
 	@Before
-	public void setUp() {	//테스트 컨텍스트를 이용한 테스트에서 @Autowired로 가져온 빈 오브젝트
-		dao = new UserDao();
-		DataSource dataSource = new SingleConnectionDataSource("jdbc:mysql://localhost/testdb", "spring", "book", true);
-		dao.setDataSource(dataSource);
+	public void setUp() { // 테스트 컨텍스트를 이용한 테스트에서 @Autowired로 가져온 빈 오브젝트
+		this.dao = this.context.getBean("userDao", UserDao.class);
 
 		this.user1 = new User("gyumee", "박성철", "springno1");
 		this.user2 = new User("leegw700", "이길원", "springno2");
