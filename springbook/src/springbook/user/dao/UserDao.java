@@ -15,6 +15,19 @@ public class UserDao {
 
 	private JdbcTemplate jdbcTemplate;
 
+	// 인스턴스 변수userMapper에 콜백 오브젝트를 저장
+	private RowMapper<User> userMapper = new RowMapper<User>() {
+
+		@Override
+		public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+			User user = new User();
+			user.setId(rs.getString("id"));
+			user.setName(rs.getString("name"));
+			user.setPassword(rs.getString("password"));
+			return user;
+		}
+	};
+
 	public void setDataSource(DataSource dataSource) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 
@@ -28,19 +41,8 @@ public class UserDao {
 
 	public User get(String id) {
 		return this.jdbcTemplate.queryForObject("select * from users where id = ?", new Object[] { id },
-				new RowMapper<User>() {
+				this.userMapper);
 
-					@Override
-					public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-						User user = new User();
-						user.setId(rs.getString("id"));
-						user.setName(rs.getString("name"));
-						user.setPassword(rs.getString("password"));
-						return user;
-
-					}
-
-				});
 	}
 
 	public void deleteAll() throws SQLException {
@@ -52,18 +54,7 @@ public class UserDao {
 	}
 
 	public List<User> getAll() {
-		return this.jdbcTemplate.query("select * from users order by id", new RowMapper<User>() {
-
-			@Override
-			public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-				User user = new User();
-				user.setId(rs.getString("id"));
-				user.setName(rs.getString("name"));
-				user.setPassword(rs.getString("password"));
-				return user;
-			}
-
-		});
+		return this.jdbcTemplate.query("select * from users order by id", this.userMapper);
 	}
 
 }

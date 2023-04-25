@@ -61,7 +61,8 @@ public class UserDaoTest {
 		assertThat(userget1.getPassword(), is(user1.getPassword()));
 
 		User userget2 = dao.get(user2.getId());
-		assertThat(userget2.getName(), is(user2.getName()));
+		assertThat(userget2.getName(), is
+				(user2.getName()));
 		assertThat(userget2.getPassword(), is(user2.getPassword()));
 
 	}
@@ -95,6 +96,8 @@ public class UserDaoTest {
 	@Test
 	public void getAll() throws SQLException, ClassNotFoundException {
 		dao.deleteAll();
+		List<User> users0 = dao.getAll();// 네커티브 테스트 -> 데이터가 없는 경우에 대한 검증
+		assertThat(users0.size(), is(0));
 
 		dao.add(user1);
 		List<User> users1 = dao.getAll();
