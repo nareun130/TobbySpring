@@ -21,7 +21,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import springbook.user.dao.UserDao;
+import springbook.user.dao.UserDaoJdbc;
 import springbook.user.domain.User;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -32,14 +32,14 @@ public class UserDaoTest2 {
 	private ApplicationContext context;
 	//애플리케이션 컨텍스트에서 직접 getBean()으로 가져온 오브젝트
 	@Autowired
-	UserDao dao1;
-	UserDao dao2;
+	UserDaoJdbc dao1;
+	UserDaoJdbc dao2;
 	
 
 	@Before
 	public void setUp() {
 		
-		dao2 = context.getBean("userDao",UserDao.class);
+		dao2 = context.getBean("userDao",UserDaoJdbc.class);
 	}
 
 	@Test

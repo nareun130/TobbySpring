@@ -14,8 +14,12 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -28,18 +32,15 @@ import springbook.user.domain.User;
 public class UserDaoTest {
 
 	@Autowired
-	ApplicationContext context;
-
-	private UserDao dao;
-
+	UserDao dao;
+	@Autowired
+	DataSource dataSource;
 	private User user1;
 	private User user2;
 	private User user3;
 
 	@Before
 	public void setUp() { // 테스트 컨텍스트를 이용한 테스트에서 @Autowired로 가져온 빈 오브젝트
-		this.dao = this.context.getBean("userDao", UserDao.class);
-
 		this.user1 = new User("gyumee", "박성철", "springno1");
 		this.user2 = new User("leegw700", "이길원", "springno2");
 		this.user3 = new User("bumjin", "박범진", "springno3");
@@ -61,8 +62,7 @@ public class UserDaoTest {
 		assertThat(userget1.getPassword(), is(user1.getPassword()));
 
 		User userget2 = dao.get(user2.getId());
-		assertThat(userget2.getName(), is
-				(user2.getName()));
+		assertThat(userget2.getName(), is(user2.getName()));
 		assertThat(userget2.getPassword(), is(user2.getPassword()));
 
 	}
@@ -117,6 +117,27 @@ public class UserDaoTest {
 		checkSameUser(user1, users3.get(1));
 		checkSameUser(user2, users3.get(2));
 
+	}
+
+	@Test(expected = DuplicateKeyException.class)
+	public void duplicateKey() {
+		dao.deleteAll();
+		dao.add(user1);
+		dao.add(user1);
+	}
+
+	@Test
+	public void sqlExceptionTranslate() {
+		dao.deleteAll();
+		try {
+			dao.add(user1);
+			dao.add(user1);
+		} catch (DuplicateKeyException ex) {
+			SQLException sqlEx = (SQLException) ex.getRootCause();
+			SQLExceptionTranslator set = new SQLErrorCodeSQLExceptionTranslator(this.dataSource);
+
+			assertThat(set.translate(null, null, sqlEx), is(DuplicateKeyException.class));
+		}
 	}
 
 	private void checkSameUser(User user1, User user2) {

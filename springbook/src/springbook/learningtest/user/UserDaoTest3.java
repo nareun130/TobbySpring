@@ -20,7 +20,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import springbook.user.dao.UserDao;
+import springbook.user.dao.UserDaoJdbc;
 import springbook.user.domain.User;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -28,7 +28,7 @@ import springbook.user.domain.User;
 public class UserDaoTest3 {
 
 	@Autowired
-	UserDao dao;
+	UserDaoJdbc dao;
 
 	private User user1;
 	private User user2;

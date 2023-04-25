@@ -18,5 +18,10 @@
 	<classpathentry kind="lib" path="C:/nareun/TobbySpring/springbook/com.springsource.org.junit-4.7.0.jar"/>
 	<classpathentry kind="lib" path="C:/nareun/TobbySpring/springbook/spring-dao-2.0.6.jar"/>
 	<classpathentry kind="lib" path="C:/nareun/TobbySpring/springbook/spring-test-3.0.7.RELEASE.jar"/>
+	<classpathentry kind="lib" path="C:/nareun/TobbySpring/spring-dao-2.0.8.jar"/>
+	<classpathentry kind="lib" path="C:/nareun/TobbySpring/spring-beans-5.2.24.RELEASE.jar"/>
+	<classpathentry kind="lib" path="C:/nareun/TobbySpring/spring-core-5.2.24.RELEASE.jar"/>
+	<classpathentry kind="lib" path="C:/nareun/TobbySpring/spring-jcl-5.2.24.RELEASE.jar"/>
+	<classpathentry kind="lib" path="C:/nareun/TobbySpring/spring-tx-5.2.24.RELEASE.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
