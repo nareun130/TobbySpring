@@ -1,12 +1,15 @@
 package springbook.user.service;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static springbook.user.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
 import static springbook.user.service.UserService.MIN_RECCOMEND_FOR_GOLD;
+
 import java.util.Arrays;
 import java.util.List;
+
+import javax.sql.DataSource;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,13 +32,11 @@ public class UserServiceTest {
 	@Autowired
 	UserDao userDao;
 
+	@Autowired
+	DataSource dataSource;
+
 	List<User> users;
 
-//	// UserService빈이 잘 주입 되었는지 확인하는 테스트 코드
-//	@Test
-//	public void bean() {
-//		assertThat(this.userService, is(notNullValue()));
-//	}
 	@Before
 	public void setUp() {
 		users = Arrays.asList(new User("bumjin", "박범진", "p1", Level.BASIC, MIN_LOGCOUNT_FOR_SILVER - 1, 0),
@@ -46,10 +47,11 @@ public class UserServiceTest {
 	}
 
 	@Test
-	public void upgradeLevels() {
+	public void upgradeLevels() throws Exception {
 		userDao.deleteAll();
 		for (User user : users)
 			userDao.add(user);
+
 		userService.upgradeLevels();
 
 		checkLevelUpgraded(users.get(0), false);
@@ -78,10 +80,25 @@ public class UserServiceTest {
 
 	}
 
-//	private void checkLevel(User user, Level expecLevel) {
-//		User userUpdate = userDao.get(user.getId());
-//		assertThat(userUpdate.getLevel(), is(expecLevel));
-//	}
+	@Test
+	public void upgradeAllOrNothing() throws Exception {
+		// 예외를 발생시킬 네 번째 사용자의 id를 넣어 테스트용 UserService대역 오브젝트를 생성
+		UserService testUserService = new TestUserService(users.get(3).getId());
+		testUserService.setUserDao(this.userDao); // userDao를 수동 DI
+		testUserService.setDataSource(this.dataSource);// dataSource를 수동 DI
+
+		userDao.deleteAll();
+		for (User user : users)
+			userDao.add(user);
+		try {
+			testUserService.upgradeLevels();
+			fail("TestUserServiceException expected");// upgradeLevels가 정상적으로 종료되면 fail때문에 테스트가 실패할 것
+
+		} catch (TestUserServiceException e) {
+
+		}
+		checkLevelUpgraded(users.get(1), false);
+	}
 
 	// checkLevel의 중복 작업을 줄여줄 메서드
 	private void checkLevelUpgraded(User user, boolean upgraded) {
@@ -91,6 +108,27 @@ public class UserServiceTest {
 		} else {
 			assertThat(userUpdate.getLevel(), is(user.getLevel()));
 		}
+	}
+
+	// 테스트용 서비스를 내부 클래스로 구현
+	static class TestUserService extends UserService {
+		private String id;
+
+		private TestUserService(String id) {
+			this.id = id;
+		}
+
+		protected void upgradeLevel(User user) {
+			if (user.getId().equals(this.id))
+				throw new TestUserServiceException();
+			super.upgradeLevel(user);
+		}
+
+	}
+
+	// 테스트용 예외
+	static class TestUserServiceException extends RuntimeException {
+
 	}
 
 }
