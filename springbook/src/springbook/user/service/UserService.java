@@ -6,7 +6,11 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import springbook.user.dao.UserDao;
@@ -14,6 +18,7 @@ import springbook.user.domain.Level;
 import springbook.user.domain.User;
 
 public class UserService {
+
 	public static final int MIN_LOGCOUNT_FOR_SILVER = 50;
 	public static final int MIN_RECCOMEND_FOR_GOLD = 30;
 
@@ -30,13 +35,12 @@ public class UserService {
 	}
 
 	// 사용자 레벨 업그레이드 메소드
-	// 트랙잰션 동기화 방식 적용
-	public void upgradeLevels() throws Exception {
+	// 트랙잰션 동기화 방식 적용 -> 스프링의 트랜잭션 추상화 API를 적용
+	public void upgradeLevels() {
+		PlatformTransactionManager transactionManager = new DataSourceTransactionManager(dataSource);
 
-		TransactionSynchronizationManager.initSynchronization();
-		Connection c = DataSourceUtils.getConnection(dataSource);
-		c.setAutoCommit(false);
-
+		// 트랜잭션 시작
+		TransactionStatus status = transactionManager.getTransaction(new DefaultTransactionDefinition());
 		try {
 			List<User> users = userDao.getAll();
 			for (User user : users) {
@@ -44,19 +48,12 @@ public class UserService {
 					upgradeLevel(user);
 				}
 			}
-			c.commit();
-
+			transactionManager.commit(status);
 		} catch (Exception e) {
-
-			c.rollback();
-		} finally {
-
-			// 스프링 유틸리티 메소드를 이용해 DB커넥션을 안전하게 닫아줌.
-			DataSourceUtils.releaseConnection(c, dataSource);
-			// 동기화 작업종료 및 정리
-			TransactionSynchronizationManager.unbindResource(this.dataSource);
-			TransactionSynchronizationManager.clearSynchronization();
+			transactionManager.rollback(status);
+			throw e;
 		}
+
 	}
 
 	protected void upgradeLevel(User user) {
@@ -73,7 +70,6 @@ public class UserService {
 			return (user.getRecommend() >= MIN_RECCOMEND_FOR_GOLD);
 		case GOLD:
 			return false;
-
 		default:
 			throw new IllegalArgumentException("Unknwon Level : " + currentLevel);
 		}
@@ -84,4 +80,5 @@ public class UserService {
 			user.setLevel(Level.BASIC);
 		userDao.add(user);
 	}
+
 }

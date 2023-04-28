@@ -82,6 +82,7 @@ public class UserServiceTest {
 
 	@Test
 	public void upgradeAllOrNothing() throws Exception {
+
 		// 예외를 발생시킬 네 번째 사용자의 id를 넣어 테스트용 UserService대역 오브젝트를 생성
 		UserService testUserService = new TestUserService(users.get(3).getId());
 		testUserService.setUserDao(this.userDao); // userDao를 수동 DI
@@ -91,7 +92,7 @@ public class UserServiceTest {
 		for (User user : users)
 			userDao.add(user);
 		try {
-			testUserService.upgradeLevels();
+			testUserService.upgradeLevels();// 여기서 Exception을 던져줘서 fail이 아닌 catch문을 타고 checkLevelUpgraded를 타는 듯
 			fail("TestUserServiceException expected");// upgradeLevels가 정상적으로 종료되면 fail때문에 테스트가 실패할 것
 
 		} catch (TestUserServiceException e) {
@@ -120,7 +121,7 @@ public class UserServiceTest {
 
 		protected void upgradeLevel(User user) {
 			if (user.getId().equals(this.id))
-				throw new TestUserServiceException();
+				throw new TestUserServiceException();// 지정된 id의 User 오브젝트가 발견되면 예외를 던져서 작업을 강제로 중단시킴.
 			super.upgradeLevel(user);
 		}
 
