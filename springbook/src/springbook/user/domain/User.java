@@ -7,6 +7,28 @@ public class User {
 	String name;
 	String password;
 
+	String email;
+
+	// 파라미터가 있는 User 생성자
+	public User(String id, String name, String password, String email, Level level, int login, int recommend) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.password = password;
+		this.email = email;
+		this.level = level;
+		this.login = login;
+		this.recommend = recommend;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
 	Level level;
 	int login;
 	int recommend;
@@ -37,23 +59,6 @@ public class User {
 
 	public User() {
 
-	}
-
-	// 파라미터가 있는 User 생성자
-	public User(String id, String name, String password) {
-		this.id = id;
-		this.name = name;
-		this.password = password;
-	}
-
-	public User(String id, String name, String password, Level level, int login, int recommend) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.password = password;
-		this.level = level;
-		this.login = login;
-		this.recommend = recommend;
 	}
 
 	public String getId() {

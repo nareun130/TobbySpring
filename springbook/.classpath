@@ -23,5 +23,8 @@
 	<classpathentry kind="lib" path="C:/nareun/TobbySpring/spring-core-5.2.24.RELEASE.jar"/>
 	<classpathentry kind="lib" path="C:/nareun/TobbySpring/spring-jcl-5.2.24.RELEASE.jar"/>
 	<classpathentry kind="lib" path="C:/nareun/TobbySpring/spring-tx-5.2.24.RELEASE.jar"/>
+	<classpathentry kind="lib" path="C:/nareun/TobbySpring/com.springsource.javax.activation-1.1.0.jar"/>
+	<classpathentry kind="lib" path="C:/nareun/TobbySpring/com.springsource.javax.mail-1.4.0.jar"/>
+	<classpathentry kind="lib" path="C:/nareun/TobbySpring/spring-context-support-3.0.7.RELEASE.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

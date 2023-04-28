@@ -42,9 +42,9 @@ public class UserDaoTest {
 
 	@Before
 	public void setUp() { // 테스트 컨텍스트를 이용한 테스트에서 @Autowired로 가져온 빈 오브젝트
-		this.user1 = new User("gyumee", "박성철", "springno1", Level.BASIC, 1, 0);
-		this.user2 = new User("leegw700", "이길원", "springno2", Level.SILVER, 55, 10);
-		this.user3 = new User("bumjin", "박범진", "springno3", Level.GOLD, 100, 40);
+//		this.user1 = new User("gyumee", "박성철", "springno1", Level.BASIC, 1, 0);
+//		this.user2 = new User("leegw700", "이길원", "springno2", Level.SILVER, 55, 10);
+//		this.user3 = new User("bumjin", "박범진", "springno3", Level.GOLD, 100, 40);
 
 	}
 
