@@ -22,13 +22,19 @@ public class UserService {
 	public static final int MIN_LOGCOUNT_FOR_SILVER = 50;
 	public static final int MIN_RECCOMEND_FOR_GOLD = 30;
 
-	UserDao userDao;
+	private UserDao userDao;
+
+	private PlatformTransactionManager transactionManager;
+
+	private DataSource dataSource;
+
+	public void setTransactionManager(PlatformTransactionManager transactionManager) {
+		this.transactionManager = transactionManager;
+	}
 
 	public void setUserDao(UserDao userDao) {
 		this.userDao = userDao;
 	}
-
-	private DataSource dataSource;
 
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
@@ -37,20 +43,20 @@ public class UserService {
 	// 사용자 레벨 업그레이드 메소드
 	// 트랙잰션 동기화 방식 적용 -> 스프링의 트랜잭션 추상화 API를 적용
 	public void upgradeLevels() {
-		PlatformTransactionManager transactionManager = new DataSourceTransactionManager(dataSource);
 
 		// 트랜잭션 시작
-		TransactionStatus status = transactionManager.getTransaction(new DefaultTransactionDefinition());
+		TransactionStatus status = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
 		try {
 			List<User> users = userDao.getAll();
 			for (User user : users) {
 				if (canUpgradeLevel(user)) {
 					upgradeLevel(user);
 				}
+
 			}
-			transactionManager.commit(status);
+			this.transactionManager.commit(status);
 		} catch (Exception e) {
-			transactionManager.rollback(status);
+			this.transactionManager.rollback(status);
 			throw e;
 		}
 
