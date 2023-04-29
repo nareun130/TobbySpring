@@ -62,22 +62,22 @@ public class UserServiceTest {
 				new User("green", "오민규", "p5", "user5@ksug.org", Level.GOLD, 100, Integer.MAX_VALUE));
 	}
 
+	// MockUserDao를 사용해서 만든 고립된 테스트
 	@Test
-	@DirtiesContext
 	public void upgradeLevels() throws Exception {
-		userDao.deleteAll();
-		for (User user : users)
-			userDao.add(user);
+		UserServiceImpl userServiceImpl = new UserServiceImpl();
+		MockUserDao mockUserDao = new MockUserDao(this.users);
+		userServiceImpl.setUserDao(mockUserDao);
 
 		MockMailSender mockMailSender = new MockMailSender();
 		userServiceImpl.setMailSender(mockMailSender);
-		userService.upgradeLevels();
 
-		checkLevelUpgraded(users.get(0), false);
-		checkLevelUpgraded(users.get(1), true);
-		checkLevelUpgraded(users.get(2), false);
-		checkLevelUpgraded(users.get(3), true);
-		checkLevelUpgraded(users.get(4), false);
+		userServiceImpl.upgradeLevels();
+
+		List<User> updated = mockUserDao.getUpdated();
+		assertThat(updated.size(), is(2));
+		checkUserAndLevel(updated.get(0), "joytouch", Level.SILVER);
+		checkUserAndLevel(updated.get(1), "madnite1", Level.GOLD);
 
 		List<String> request = mockMailSender.getRequests();
 		assertThat(request.size(), is(2));
@@ -129,6 +129,11 @@ public class UserServiceTest {
 		checkLevelUpgraded(users.get(1), false);
 	}
 
+	private void checkUserAndLevel(User updated, String expectedId, Level expectedLevel) {
+		assertThat(updated.getId(), is(expectedId));
+		assertThat(updated.getLevel(), is(expectedLevel));
+	}
+
 	// checkLevel의 중복 작업을 줄여줄 메서드
 	private void checkLevelUpgraded(User user, boolean upgraded) {
 		User userUpdate = userDao.get(user.getId());
@@ -174,6 +179,51 @@ public class UserServiceTest {
 
 		}
 
+	}
+
+	// 테스트용 UserDao 목오브젝트
+	static class MockUserDao implements UserDao {
+		private List<User> users;
+		private List<User> updated = new ArrayList<>();
+
+		private MockUserDao(List<User> users) {
+			this.users = users;
+		}
+
+		public List<User> getUpdated() {
+			return this.updated;
+		}
+
+		@Override
+		public void add(User user) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public User get(String id) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public List<User> getAll() {// 스텁 기능 제공
+			return this.users;
+		}
+
+		@Override
+		public void deleteAll() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public int getCount() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void update(User user) {// 목 오브젝트 기능 제공
+			updated.add(user);
+
+		}
 	}
 
 	// 테스트용 예외
