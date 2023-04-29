@@ -3,8 +3,8 @@ package springbook.user.service;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static springbook.user.service.UserService.MIN_LOGCOUNT_FOR_SILVER;
-import static springbook.user.service.UserService.MIN_RECCOMEND_FOR_GOLD;
+import static springbook.user.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
+import static springbook.user.service.UserServiceImpl.MIN_RECCOMEND_FOR_GOLD;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +39,9 @@ public class UserServiceTest {
 	UserService userService;
 
 	@Autowired
+	UserServiceImpl userServiceImpl;
+
+	@Autowired
 	UserDao userDao;
 
 	@Autowired
@@ -67,7 +70,7 @@ public class UserServiceTest {
 			userDao.add(user);
 
 		MockMailSender mockMailSender = new MockMailSender();
-		userService.setMailSender(mockMailSender);
+		userServiceImpl.setMailSender(mockMailSender);
 		userService.upgradeLevels();
 
 		checkLevelUpgraded(users.get(0), false);
@@ -105,16 +108,19 @@ public class UserServiceTest {
 	public void upgradeAllOrNothing() throws Exception {
 
 		// 예외를 발생시킬 네 번째 사용자의 id를 넣어 테스트용 UserService대역 오브젝트를 생성
-		UserService testUserService = new TestUserService(users.get(3).getId());
+		TestUserService testUserService = new TestUserService(users.get(3).getId());
 		testUserService.setUserDao(this.userDao); // userDao를 수동 DI
-		testUserService.setTransactionManager(transactionManager);// userService 빈의 프로퍼티 설정과 동일한 수동 DI
 		testUserService.setMailSender(mailSender);
+
+		UserServiceTx txUserService = new UserServiceTx();
+		txUserService.setTransactionManager(transactionManager);
+		txUserService.setUserService(testUserService);
 
 		userDao.deleteAll();
 		for (User user : users)
 			userDao.add(user);
 		try {
-			testUserService.upgradeLevels();// 여기서 Exception을 던져줘서 fail이 아닌 catch문을 타고 checkLevelUpgraded를 타는 듯
+			txUserService.upgradeLevels();// 여기서 Exception을 던져줘서 fail이 아닌 catch문을 타고 checkLevelUpgraded를 타는 듯
 			fail("TestUserServiceException expected");// upgradeLevels가 정상적으로 종료되면 fail때문에 테스트가 실패할 것
 
 		} catch (TestUserServiceException e) {
@@ -134,7 +140,7 @@ public class UserServiceTest {
 	}
 
 	// 테스트용 서비스를 내부 클래스로 구현
-	static class TestUserService extends UserService {
+	static class TestUserService extends UserServiceImpl {
 		private String id;
 
 		private TestUserService(String id) {

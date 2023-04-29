@@ -21,11 +21,13 @@ public class UserTest {
 	public void upgradeLevel() {
 		Level[] levels = Level.values();
 		for (Level level : levels) {
+
 			if (level.nextLevel() == null)
 				continue;
 			user.setLevel(level);
 			user.upgradeLevel();
 			assertThat(user.getLevel(), is(level.nextLevel()));
+
 		}
 	}
 
