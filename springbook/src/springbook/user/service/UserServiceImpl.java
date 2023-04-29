@@ -99,6 +99,5 @@ public class UserServiceImpl implements UserService {
 			user.setLevel(Level.BASIC);
 		userDao.add(user);
 	}
-	
 
 }
