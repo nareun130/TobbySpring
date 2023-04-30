@@ -16,9 +16,12 @@
 		<property name="password" value="book" />
 	</bean>
 	<bean id="userService"
-		class="springbook.user.service.UserServiceTx">
+		class="springbook.user.service.TxProxyFactoryBean">
+		<property name="target" ref="userServiceImpl" />
 		<property name="transactionManager" ref="transactionManager" />
-		<property name="userService" ref="userServiceImpl" />
+		<property name="pattern" value="upgradeLevels" />
+		<property name="serviceInterface"
+			value="springbook.user.service.UserService" />
 	</bean>
 	<bean id="userServiceImpl"
 		class="springbook.user.service.UserServiceImpl">
@@ -33,5 +36,5 @@
 	<bean id="mailSender"
 		class="springbook.user.service.DummyMailSender">
 	</bean>
-	
+
 </beans>

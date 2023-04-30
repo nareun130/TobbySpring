@@ -23,9 +23,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -40,6 +42,9 @@ public class UserServiceTest {
 
 	@Autowired
 	PlatformTransactionManager transactionManager;
+
+	@Autowired
+	ApplicationContext context;
 
 	@Autowired
 	UserService userService;
@@ -140,19 +145,19 @@ public class UserServiceTest {
 	}
 
 	@Test
+	@DirtiesContext
 	public void upgradeAllOrNothing() throws Exception {
 
 		// 예외를 발생시킬 네 번째 사용자의 id를 넣어 테스트용 UserService대역 오브젝트를 생성
+
 		TestUserService testUserService = new TestUserService(users.get(3).getId());
 		testUserService.setUserDao(this.userDao); // userDao를 수동 DI
 		testUserService.setMailSender(mailSender);
 
-		TransactionHandler txHandler = new TransactionHandler();
-		txHandler.setTarget(testUserService);
-		txHandler.setTransactionManager(transactionManager);
-		txHandler.setPattern("upgradeLevels");
-		UserService txUserService = (UserService) Proxy.newProxyInstance(getClass().getClassLoader(),
-				new Class[] { UserService.class }, txHandler);
+		// 팩토리 빈 자체를 가져옴.
+		TxProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", TxProxyFactoryBean.class);// 테스트용 타깃 주입
+		txProxyFactoryBean.setTarget(testUserService);
+		UserService txUserService = (UserService) txProxyFactoryBean.getObject();
 
 		userDao.deleteAll();
 		for (User user : users)
