@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.mail.MailException;
@@ -145,17 +146,19 @@ public class UserServiceTest {
 	}
 
 	@Test
-	@DirtiesContext
+	@DirtiesContext // 컨텍스트 설정을 변경하기 때문에 여전히 필요
 	public void upgradeAllOrNothing() throws Exception {
 
 		// 예외를 발생시킬 네 번째 사용자의 id를 넣어 테스트용 UserService대역 오브젝트를 생성
-
 		TestUserService testUserService = new TestUserService(users.get(3).getId());
 		testUserService.setUserDao(this.userDao); // userDao를 수동 DI
 		testUserService.setMailSender(mailSender);
 
 		// 팩토리 빈 자체를 가져옴.
-		TxProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", TxProxyFactoryBean.class);// 테스트용 타깃 주입
+//		TxProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", TxProxyFactoryBean.class);// 테스트용 타깃 주입
+//		txProxyFactoryBean.setTarget(testUserService);
+		
+		ProxyFactoryBean txProxyFactoryBean = context.getBean("&userService",ProxyFactoryBean.class);
 		txProxyFactoryBean.setTarget(testUserService);
 		UserService txUserService = (UserService) txProxyFactoryBean.getObject();
 

@@ -5,6 +5,7 @@ import java.lang.reflect.Proxy;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 
+//JDK 다이내믹 프록시의 구조
 public class TxProxyFactoryBean implements FactoryBean<Object> {
 
 	Object target;

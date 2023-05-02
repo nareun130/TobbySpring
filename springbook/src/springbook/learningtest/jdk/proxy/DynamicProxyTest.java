@@ -15,6 +15,7 @@ import org.springframework.aop.support.NameMatchMethodPointcut;
 import springbook.learningtest.jdk.UppercaseHandler;
 
 public class DynamicProxyTest {
+	
 	@Test
 	public void simpleProxy() {
 		// jdk 다이내믹 프록시 생성
@@ -35,7 +36,7 @@ public class DynamicProxyTest {
 		assertThat(proxiedHello.sayThankYou("Toby"), is("THANK YOU TOBY"));
 	}
 
-	//포인트 컷을 적용한 ProxyFactoryBean
+	// 포인트 컷을 적용한 ProxyFactoryBean
 	@Test
 	public void pointcutAdvise() {
 		ProxyFactoryBean pfBean = new ProxyFactoryBean();
@@ -43,10 +44,11 @@ public class DynamicProxyTest {
 
 		// 메소드 이름을 비교해서 대상을 선정하는 알고리즘을 제공하는 포인트컷 생성
 		NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
-		//이름 비교조건 설정. sayH로 시작하는 모든 메소드를 선택하게 함.
+		// 이름 비교조건 설정. sayH로 시작하는 모든 메소드를 선택하게 함.
 		pointcut.setMappedName("sayH*");
 
-		// 포인트 컷과 어드바이스를 Advisor로 묶어서 한 번에 추가
+		// 포인트 컷과 어드바이스를 Advisor로 묶어서 한 번에 추가 
+		// -> 포인트컷과 어드바이스를 따로 등록하면 어던 어드바이스에 대해 어떤 포인트컷을 적용할 지 애매해져서
 		pfBean.addAdvisor(new DefaultPointcutAdvisor(pointcut, new UppercaseAdvice()));
 
 		Hello proxiedHello = (Hello) pfBean.getObject();
