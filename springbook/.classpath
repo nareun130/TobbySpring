@@ -27,5 +27,7 @@
 	<classpathentry kind="lib" path="C:/nareun/TobbySpring/com.springsource.javax.mail-1.4.0.jar"/>
 	<classpathentry kind="lib" path="C:/nareun/TobbySpring/spring-context-support-3.0.7.RELEASE.jar"/>
 	<classpathentry kind="lib" path="C:/nareun/TobbySpring/mockito-all-1.10.19.jar"/>
+	<classpathentry kind="lib" path="C:/nareun/TobbySpring/com.springsource.org.aopalliance-1.0.0.jar"/>
+	<classpathentry kind="lib" path="C:/nareun/TobbySpring/spring-aop-3.0.7.RELEASE.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

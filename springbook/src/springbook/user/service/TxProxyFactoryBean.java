@@ -45,7 +45,7 @@ public class TxProxyFactoryBean implements FactoryBean<Object> {
 		// 팩토리 빈이 생성하는 오브젝트 타입은 DI 받은 인터페이스 타입에 따라 달라짐. -> 다양한 타입의 프록시 오브젝트 생성에 재사용 가능
 		return serviceInterface;
 	}
-
+	
 	@Override
 	public boolean isSingleton() {
 		// 싱글톤 빈이 아니라는 뜻이 아님. -> getObject()가 매번 같은 오브젝트를 리턴하지 않는다는 뜻.
