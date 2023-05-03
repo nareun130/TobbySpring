@@ -161,6 +161,11 @@ public class UserServiceTest {
 		checkLevelUpgraded(users.get(1), false);
 	}
 
+	//자동생성된 프록시 확인
+	@Test
+	public void advisorAutoProxyCreater() {
+		assertThat(testUserService, is(java.lang.reflect.Proxy.class));
+	}
 	// 테스트용 서비스를 내부 클래스로 구현 -> 수정함.
 	static class TestUserServiceImpl extends UserServiceImpl {
 		private String id = "madnite1"; // 테스트 픽스처의 users(3)의 id값을 고정시킴.
