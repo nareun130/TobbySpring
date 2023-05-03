@@ -14,7 +14,7 @@ public class Target implements TargetInterface {
 	}
 
 	@Override
-	public int plus(int a, int b) {
+	public int plus(int a, int b) {	
 		return 0;
 	}
 
