@@ -49,15 +49,12 @@ public class UserServiceTest {
 
 	@Autowired
 	UserService userService;
-
 	@Autowired
-	UserServiceImpl userServiceImpl;
+	UserService testUserService;// 같은 타입의 빈이 두개 존재 -> 필드 이름을 기준으로 주입될 빈이 결정됨.
+	// 자동 프록시 생성기에 의해 트랜잭션 부가기능이 testUserService 빈에 적용됐는지를 확인하는 것이 목적
 
 	@Autowired
 	UserDao userDao;
-
-	@Autowired
-	DataSource dataSource;
 
 	@Autowired
 	MailSender mailSender;
@@ -78,6 +75,7 @@ public class UserServiceTest {
 	@Test
 	public void upgradeLevels() throws Exception {
 		UserServiceImpl userServiceImpl = new UserServiceImpl();
+
 		MockUserDao mockUserDao = new MockUserDao(this.users);
 		userServiceImpl.setUserDao(mockUserDao);
 
@@ -145,34 +143,39 @@ public class UserServiceTest {
 
 	}
 
-	@Test
-	@DirtiesContext // 컨텍스트 설정을 변경하기 때문에 여전히 필요
+	@Test // 스프링 컨텍스트의 빈 설정을 변경하지 않으므로 @DirtiesContext 애노테이션 제거. 모든 테스트를 위한 DI 작업은 설정파일을
+			// 통해 서버에서 진행되므로 테스트 코드 자체는 단순해짐.
 	public void upgradeAllOrNothing() throws Exception {
-
-		// 예외를 발생시킬 네 번째 사용자의 id를 넣어 테스트용 UserService대역 오브젝트를 생성
-		TestUserService testUserService = new TestUserService(users.get(3).getId());
-		testUserService.setUserDao(this.userDao); // userDao를 수동 DI
-		testUserService.setMailSender(mailSender);
-
-		// 팩토리 빈 자체를 가져옴.
-//		TxProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", TxProxyFactoryBean.class);// 테스트용 타깃 주입
-//		txProxyFactoryBean.setTarget(testUserService);
-		
-		ProxyFactoryBean txProxyFactoryBean = context.getBean("&userService",ProxyFactoryBean.class);
-		txProxyFactoryBean.setTarget(testUserService);
-		UserService txUserService = (UserService) txProxyFactoryBean.getObject();
 
 		userDao.deleteAll();
 		for (User user : users)
 			userDao.add(user);
+
 		try {
-			txUserService.upgradeLevels();// 여기서 Exception을 던져줘서 fail이 아닌 catch문을 타고 checkLevelUpgraded를 타는 듯
+			testUserService.upgradeLevels();
 			fail("TestUserServiceException expected");// upgradeLevels가 정상적으로 종료되면 fail때문에 테스트가 실패할 것
 
 		} catch (TestUserServiceException e) {
 
 		}
 		checkLevelUpgraded(users.get(1), false);
+	}
+
+	// 테스트용 서비스를 내부 클래스로 구현 -> 수정함.
+	static class TestUserServiceImpl extends UserServiceImpl {
+		private String id = "madnite1"; // 테스트 픽스처의 users(3)의 id값을 고정시킴.
+
+		protected void upgradeLevel(User user) {
+			if (user.getId().equals(this.id))
+				throw new TestUserServiceException();// 지정된 id의 User 오브젝트가 발견되면 예외를 던져서 작업을 강제로 중단시킴.
+			super.upgradeLevel(user);
+		}
+
+	}
+
+	// 테스트용 예외
+	static class TestUserServiceException extends RuntimeException {
+
 	}
 
 	private void checkUserAndLevel(User updated, String expectedId, Level expectedLevel) {
@@ -188,22 +191,6 @@ public class UserServiceTest {
 		} else {
 			assertThat(userUpdate.getLevel(), is(user.getLevel()));
 		}
-	}
-
-	// 테스트용 서비스를 내부 클래스로 구현
-	static class TestUserService extends UserServiceImpl {
-		private String id;
-
-		private TestUserService(String id) {
-			this.id = id;
-		}
-
-		protected void upgradeLevel(User user) {
-			if (user.getId().equals(this.id))
-				throw new TestUserServiceException();// 지정된 id의 User 오브젝트가 발견되면 예외를 던져서 작업을 강제로 중단시킴.
-			super.upgradeLevel(user);
-		}
-
 	}
 
 	static class MockMailSender implements MailSender {
@@ -270,11 +257,6 @@ public class UserServiceTest {
 			updated.add(user);
 
 		}
-	}
-
-	// 테스트용 예외
-	static class TestUserServiceException extends RuntimeException {
-
 	}
 
 }

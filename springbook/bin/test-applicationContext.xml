@@ -20,7 +20,7 @@
 		ref="transactionManager" /> <property name="pattern" value="upgradeLevels" 
 		/> <property name="serviceInterface" value="springbook.user.service.UserService" 
 		/> </bean> -->
-	<bean id="userServiceImpl"
+	<bean id="userService"
 		class="springbook.user.service.UserServiceImpl">
 		<property name="userDao" ref="userDao" />
 		<property name="mailSender" ref="mailSender" />
@@ -38,22 +38,23 @@
 		<property name="transactionManager" ref="transactionManager" />
 	</bean>
 	<bean id="transactionPointcut"
-		class="org.springframework.aop.support.NameMatchMethodPointcut">
+		class="springbook.user.service.NameMatchClassMethodPointcut">
+		<property name="mappedClassName" value="*ServiceImpl" />
 		<property name="mappedName" value="upgrade*" />
 	</bean>
+	
 	<bean id="transactionAdvisor"
 		class="org.springframework.aop.support.DefaultPointcutAdvisor">
 		<property name="advice" ref="transactionAdvice" />
 		<property name="pointcut" ref="transactionPointcut" />
 	</bean>
-	<bean id="userService"
-		class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="target" ref="userServiceImpl" />
-		<property name="interceptorNames">
-			<list>
-				<value>transactionAdvisor</value>
-			</list>
-		</property>
 
-	</bean>
+	<!-- aop -->
+	<bean
+		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" />
+	<!-- 테스트용 UserService의 등록 스태틱 멤버 클래스는 $로 지정, parent를 통해 프로퍼티 정의를 포함한 userService빈의 
+		설정을 상속 받음. -->
+	<bean id="testUserService"
+		class="springbook.user.service.UserServiceTest$TestUserServiceImpl"
+		parent="userService" />
 </beans>
