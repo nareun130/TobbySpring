@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans 
-						http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+						http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						http://www.springframework.org/schema/aop
+						http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
 	<!-- setDataSource를 나타내는 name ref는 매개변수로 받아오는 참조 변수 -->
 	<bean id="userDao" class="springbook.user.dao.UserDaoJdbc">
 		<property name="dataSource" ref="dataSource" />
@@ -46,16 +49,10 @@
 	</bean>
 
 	<!-- aop -->
-	<bean
-		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" />
-	<!-- 테스트용 UserService의 등록 스태틱 멤버 클래스는 $로 지정, parent를 통해 프로퍼티 정의를 포함한 userService빈의 
-		설정을 상속 받음. -->
-	<bean id="testUserService"
-		class="springbook.user.service.UserServiceTest$TestUserServiceImpl"
-		parent="userService" />
-	<bean id="transactionPointcut"
-		class="org.springframework.aop.aspectj.AspectJExpressionPointcut">
-		<property name="expression"
-			value="execution(* *..*ServiceImpl.upgrade*(..))" />
-	</bean>
+	<aop:config>
+		<aop:pointcut id="transactionPointcut"
+			expression="execution(* *..*ServiceImpl.upgrade*(..))" />
+		<aop:advisor advice-ref="transactionAdvice"
+			pointcut-ref="transactionPointcut" />
+	</aop:config>
 </beans>
