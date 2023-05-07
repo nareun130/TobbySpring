@@ -19,6 +19,7 @@ public class TransactionAdvice implements MethodInterceptor {
 	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		TransactionStatus status = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
+		// DefaultTransactionDefinition(트랜잭션 정의를 통한 네가지 조건) + RuntimeException(롤백 대상인 예외 종류) => TransactionAttribute(트랜잭션 부가기능의 행동 결정)
 		try {
 			// 콜백을 호출해서 타깃의 메소드를 실행. 타깃 메소드 호출 전후로 필요한 부가기능을 넣을 수 있다.
 			// 경우에 따라서 타깃이 아예 호출되지 않게 하거나 재시도를 위한 반복적인 호출도 가능

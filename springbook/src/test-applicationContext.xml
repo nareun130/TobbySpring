@@ -2,10 +2,13 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans 
 						http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 						http://www.springframework.org/schema/aop
-						http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+						http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+						http://www.springframework.org/schema/tx
+						http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
 	<!-- setDataSource를 나타내는 name ref는 매개변수로 받아오는 참조 변수 -->
 	<bean id="userDao" class="springbook.user.dao.UserDaoJdbc">
 		<property name="dataSource" ref="dataSource" />
@@ -18,11 +21,16 @@
 		<property name="username" value="spring" />
 		<property name="password" value="book" />
 	</bean>
-	<!-- <bean id="userService" class="springbook.user.service.TxProxyFactoryBean"> 
-		<property name="target" ref="userServiceImpl" /> <property name="transactionManager" 
-		ref="transactionManager" /> <property name="pattern" value="upgradeLevels" 
-		/> <property name="serviceInterface" value="springbook.user.service.UserService" 
-		/> </bean> -->
+	<!-- TransactionInterceptor 빈 -->
+	<tx:advice id="transactionAdvice"> <tx:attributes> <tx:method name="get*" 
+		read-only="true" /> <tx:method name="*" /> </tx:attributes> </tx:advice>
+		
+	<!-- aop -->
+	<aop:config>
+		<aop:advisor advice-ref="transactionAdvice"
+			pointcut="bean(*Service)" />
+	</aop:config>
+
 	<bean id="userService"
 		class="springbook.user.service.UserServiceImpl">
 		<property name="userDao" ref="userDao" />
@@ -34,25 +42,12 @@
 		<property name="dataSource" ref="dataSource" />
 	</bean>
 	<bean id="mailSender"
-		class="springbook.user.service.DummyMailSender">
-	</bean>
-	<bean id="transactionAdvice"
-		class="springbook.user.service.TransactionAdvice">
-		<property name="transactionManager" ref="transactionManager" />
-	</bean>
+		class="springbook.user.service.DummyMailSender" />
+	<!-- <bean id="transactionAdvice" class="springbook.user.service.TransactionAdvice"> 
+		<property name="transactionManager" ref="transactionManager" /> </bean> -->
 
 
-	<bean id="transactionAdvisor"
-		class="org.springframework.aop.support.DefaultPointcutAdvisor">
-		<property name="advice" ref="transactionAdvice" />
-		<property name="pointcut" ref="transactionPointcut" />
-	</bean>
-
-	<!-- aop -->
-	<aop:config>
-		<aop:pointcut id="transactionPointcut"
-			expression="execution(* *..*ServiceImpl.upgrade*(..))" />
-		<aop:advisor advice-ref="transactionAdvice"
-			pointcut-ref="transactionPointcut" />
-	</aop:config>
+	<!-- <bean id="transactionAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor"> 
+		<property name="advice" ref="transactionAdvice" /> <property name="pointcut" 
+		ref="transactionPointcut" /> </bean> -->
 </beans>
