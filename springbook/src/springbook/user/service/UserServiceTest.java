@@ -11,24 +11,21 @@ import static org.mockito.Mockito.when;
 import static springbook.user.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
 import static springbook.user.service.UserServiceImpl.MIN_RECCOMEND_FOR_GOLD;
 
-import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.sql.DataSource;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -95,135 +92,15 @@ public class UserServiceTest {
 		assertThat(request.get(1), is(users.get(3).getEmail()));
 	}
 
-	// Mockito를 적용한 테스트 코드
-	@Test
-	public void mockUpgradeLevels() {
-		UserServiceImpl userServiceImpl = new UserServiceImpl();
-
-		// 다이내믹한 목 오브젝트 생서과 메소드의 리턴 값 설정, DI까지
-		UserDao mockUserDao = mock(UserDao.class);
-		when(mockUserDao.getAll()).thenReturn(this.users);
-		userServiceImpl.setUserDao(mockUserDao);
-
-		// 리턴 값이 없는 메소드를 가진 목 오브젝트
-		MailSender mockMailSender = mock(MailSender.class);
-		userServiceImpl.setMailSender(mockMailSender);
-
-		userServiceImpl.upgradeLevels();
-		verify(mockUserDao, times(2)).update(any(User.class));
-		verify(mockUserDao, times(2)).update(any(User.class));
-		verify(mockUserDao).update(users.get(1));
-		assertThat(users.get(1).getLevel(), is(Level.SILVER));
-		verify(mockUserDao).update(users.get(3));
-		assertThat(users.get(3).getLevel(), is(Level.GOLD));
-
-		ArgumentCaptor<SimpleMailMessage> mailMessageArg = ArgumentCaptor.forClass(SimpleMailMessage.class);
-		verify(mockMailSender, times(2)).send(mailMessageArg.capture());
-		List<SimpleMailMessage> mailMessages = mailMessageArg.getAllValues();
-		assertThat(mailMessages.get(0).getTo()[0], is(users.get(1).getEmail()));
-		assertThat(mailMessages.get(1).getTo()[0], is(users.get(3).getEmail()));
-	}
-
-	@Test
-	public void add() {
-		userDao.deleteAll();
-
-		User userWithLevel = users.get(4);
-		User userWithoutLevel = users.get(0);
-		userWithoutLevel.setLevel(null);
-
-		userService.add(userWithLevel);
-		userService.add(userWithoutLevel);
-
-		User userWithLevelRead = userDao.get(userWithLevel.getId());
-		User userWithoutLevelRead = userDao.get(userWithoutLevel.getId());
-
-		assertThat(userWithLevelRead.getLevel(), is(userWithLevel.getLevel()));
-		assertThat(userWithoutLevelRead.getLevel(), is(Level.BASIC));
-
-	}
-
-	@Test // 스프링 컨텍스트의 빈 설정을 변경하지 않으므로 @DirtiesContext 애노테이션 제거. 모든 테스트를 위한 DI 작업은 설정파일을
-			// 통해 서버에서 진행되므로 테스트 코드 자체는 단순해짐.
-	public void upgradeAllOrNothing() throws Exception {
-
-		userDao.deleteAll();
-		for (User user : users)
-			userDao.add(user);
-
-		try {
-			testUserService.upgradeLevels();
-			fail("TestUserServiceException expected");// upgradeLevels가 정상적으로 종료되면 fail때문에 테스트가 실패할 것
-
-		} catch (TestUserServiceException e) {
-
-		}
-		checkLevelUpgraded(users.get(1), false);
-	}
-
-	// 자동생성된 프록시 확인
-	@Test
-	public void advisorAutoProxyCreater() {
-		assertThat(testUserService, is(java.lang.reflect.Proxy.class));
-	}
-
-	// 테스트용 서비스를 내부 클래스로 구현 -> 수정함.
-	static class TestUserServiceImpl extends UserServiceImpl {
-		private String id = "madnite1"; // 테스트 픽스처의 users(3)의 id값을 고정시킴.
-
-		protected void upgradeLevel(User user) {
-			if (user.getId().equals(this.id))
-				throw new TestUserServiceException();// 지정된 id의 User 오브젝트가 발견되면 예외를 던져서 작업을 강제로 중단시킴.
-			super.upgradeLevel(user);
-		}
-
-	}
-
-	// 테스트용 예외
-	static class TestUserServiceException extends RuntimeException {
-
-	}
-
 	private void checkUserAndLevel(User updated, String expectedId, Level expectedLevel) {
 		assertThat(updated.getId(), is(expectedId));
 		assertThat(updated.getLevel(), is(expectedLevel));
 	}
 
-	// checkLevel의 중복 작업을 줄여줄 메서드
-	private void checkLevelUpgraded(User user, boolean upgraded) {
-		User userUpdate = userDao.get(user.getId());
-		if (upgraded) {
-			assertThat(userUpdate.getLevel(), is(user.getLevel().nextLevel()));
-		} else {
-			assertThat(userUpdate.getLevel(), is(user.getLevel()));
-		}
-	}
-
-	static class MockMailSender implements MailSender {
-		// UserService로부터 전송 요청을 받은 메일 주소를 저장해두고 이를 읽을 수 있게 함.
-		private List<String> requests = new ArrayList<String>();
-
-		public List<String> getRequests() {
-			return requests;
-		}
-
-		@Override
-		public void send(SimpleMailMessage mailMessage) throws MailException {
-			requests.add(mailMessage.getTo()[0]);// 전송 요청을 받은 이메일 주소를 저장해둠.
-			// 간단하게 첫 번째 수신자 메일 주소만 저장
-		}
-
-		@Override
-		public void send(SimpleMailMessage[] mailMessage) throws MailException {
-
-		}
-
-	}
-
 	// 테스트용 UserDao 목오브젝트
 	static class MockUserDao implements UserDao {
 		private List<User> users;
-		private List<User> updated = new ArrayList<>();
+		private List<User> updated = new ArrayList<User>();
 
 		private MockUserDao(List<User> users) {
 			this.users = users;
@@ -263,6 +140,136 @@ public class UserServiceTest {
 			updated.add(user);
 
 		}
+	}
+
+	static class MockMailSender implements MailSender {
+		// UserService로부터 전송 요청을 받은 메일 주소를 저장해두고 이를 읽을 수 있게 함.
+		private List<String> requests = new ArrayList<String>();
+
+		public List<String> getRequests() {
+			return requests;
+		}
+
+		@Override
+		public void send(SimpleMailMessage mailMessage) throws MailException {
+			requests.add(mailMessage.getTo()[0]);// 전송 요청을 받은 이메일 주소를 저장해둠.
+			// 간단하게 첫 번째 수신자 메일 주소만 저장
+		}
+
+		@Override
+		public void send(SimpleMailMessage[] mailMessage) throws MailException {
+
+		}
+
+	}
+
+	// Mockito를 적용한 테스트 코드
+	@Test
+	public void mockUpgradeLevels() {
+		UserServiceImpl userServiceImpl = new UserServiceImpl();
+
+		// 다이내믹한 목 오브젝트 생서과 메소드의 리턴 값 설정, DI까지
+		UserDao mockUserDao = mock(UserDao.class);
+		when(mockUserDao.getAll()).thenReturn(this.users);
+		userServiceImpl.setUserDao(mockUserDao);
+
+		// 리턴 값이 없는 메소드를 가진 목 오브젝트
+		MailSender mockMailSender = mock(MailSender.class);
+		userServiceImpl.setMailSender(mockMailSender);
+
+		userServiceImpl.upgradeLevels();
+
+		verify(mockUserDao, times(2)).update(any(User.class));
+		verify(mockUserDao, times(2)).update(any(User.class));
+		verify(mockUserDao).update(users.get(1));
+		assertThat(users.get(1).getLevel(), is(Level.SILVER));
+		verify(mockUserDao).update(users.get(3));
+		assertThat(users.get(3).getLevel(), is(Level.GOLD));
+
+		ArgumentCaptor<SimpleMailMessage> mailMessageArg = ArgumentCaptor.forClass(SimpleMailMessage.class);
+		verify(mockMailSender, times(2)).send(mailMessageArg.capture());
+		List<SimpleMailMessage> mailMessages = mailMessageArg.getAllValues();
+		assertThat(mailMessages.get(0).getTo()[0], is(users.get(1).getEmail()));
+		assertThat(mailMessages.get(1).getTo()[0], is(users.get(3).getEmail()));
+	}
+
+	// checkLevel의 중복 작업을 줄여줄 메서드
+	private void checkLevelUpgraded(User user, boolean upgraded) {
+		User userUpdate = userDao.get(user.getId());
+		if (upgraded) {
+			assertThat(userUpdate.getLevel(), is(user.getLevel().nextLevel()));
+		} else {
+			assertThat(userUpdate.getLevel(), is(user.getLevel()));
+		}
+	}
+
+	@Test
+	public void add() {
+		userDao.deleteAll();
+
+		User userWithLevel = users.get(4);
+		User userWithoutLevel = users.get(0);
+		userWithoutLevel.setLevel(null);
+
+		userService.add(userWithLevel);
+		userService.add(userWithoutLevel);
+
+		User userWithLevelRead = userDao.get(userWithLevel.getId());
+		User userWithoutLevelRead = userDao.get(userWithoutLevel.getId());
+
+		assertThat(userWithLevelRead.getLevel(), is(userWithLevel.getLevel()));
+		assertThat(userWithoutLevelRead.getLevel(), is(Level.BASIC));
+
+	}
+
+	@Test // 스프링 컨텍스트의 빈 설정을 변경하지 않으므로 @DirtiesContext 애노테이션 제거. 모든 테스트를 위한 DI 작업은 설정파일을
+			// 통해 서버에서 진행되므로 테스트 코드 자체는 단순해짐.
+	public void upgradeAllOrNothing() throws Exception {
+
+		userDao.deleteAll();
+		for (User user : users)
+			userDao.add(user);
+
+		try {
+			testUserService.upgradeLevels();
+			fail("TestUserServiceException expected");// upgradeLevels가 정상적으로 종료되면 fail때문에 테스트가 실패할 것
+
+		} catch (TestUserServiceException e) {
+
+		}
+		checkLevelUpgraded(users.get(1), false);
+	}
+
+	// 테스트용 서비스를 내부 클래스로 구현 -> 수정함.
+	static class TestUserService extends UserServiceImpl {
+		private String id = "madnite1"; // 테스트 픽스처의 users(3)의 id값을 고정시킴.
+
+		protected void upgradeLevel(User user) {
+			if (user.getId().equals(this.id))
+				throw new TestUserServiceException();// 지정된 id의 User 오브젝트가 발견되면 예외를 던져서 작업을 강제로 중단시킴.
+			super.upgradeLevel(user);
+		}
+
+		public List<User> getAll() {
+
+			// 읽기 전용 트랜잭션 대상인 get으로 시작하는 메소드를 오버라이드한다.
+			for (User user : super.getAll()) {
+				// 강제로 쓰기를 시도. 여기서 읽기전용속성으로 인한 예외 발생해야함.
+				super.update(user);
+			}
+			// 메소드가 끝나기 전에 예외가 발생해야 하니 리턴값은 별의미 없음
+			return null;
+		}
+	}
+
+	@Test(expected = TransientDataAccessResourceException.class)
+	public void readOnlyTransactionAttribute() {
+		testUserService.getAll();
+	}
+
+	// 테스트용 예외
+	static class TestUserServiceException extends RuntimeException {
+
 	}
 
 }
