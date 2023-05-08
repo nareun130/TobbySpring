@@ -34,22 +34,17 @@ public class UserServiceImpl implements UserService {
 	public static final int MIN_LOGCOUNT_FOR_SILVER = 50;
 	public static final int MIN_RECCOMEND_FOR_GOLD = 30;
 
-	UserDao userDao;
+	private UserDao userDao;
 
-	MailSender mailSender;
+	private MailSender mailSender;
 
 	public void setMailSender(MailSender mailSender) {
 		this.mailSender = mailSender;
 	}
 
-	DataSource dataSource;
 
 	public void setUserDao(UserDao userDao) {
 		this.userDao = userDao;
-	}
-
-	public void setDataSource(DataSource dataSource) {
-		this.dataSource = dataSource;
 	}
 
 	public void upgradeLevels() {
