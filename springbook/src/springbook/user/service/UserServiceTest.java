@@ -25,10 +25,12 @@ import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import springbook.user.dao.UserDao;
@@ -234,23 +236,16 @@ public class UserServiceTest {
 		}
 	}
 
+	// 롤백 테스트
+	//테스트 메소드나 클래스에서 사용하는 @Transactional은 기본적으로 트랜잭션을 강제로 롤백시킴.
 	@Test
+	@Transactional
+	@Rollback(false)
 	public void transactionSync() {
-		// 트랜잭션 롤백했을 때 초기 상태를 만들기 위해 트랜잭션 시작 전에 초기화 해둠.
-		userDao.deleteAll();
-		assertThat(userDao.getCount(), is(0));
 
-		// 트랜잭션 정의의 기본값 사용
-		DefaultTransactionDefinition txDefinition = new DefaultTransactionDefinition();
-		TransactionStatus txStatus = transactionManager.getTransaction(txDefinition);
-
-		// 앞에서 만들어진 트랜잭션에 모두 참여
+		userService.deleteAll();
 		userService.add(users.get(0));
 		userService.add(users.get(1));
-		assertThat(userDao.getCount(), is(2));
-
-		transactionManager.rollback(txStatus);//강제 롤백 -> 트랜잭션 시작 전으로 돌아감.
-		assertThat(userDao.getCount(), is(0));
 	}
 
 	static class TestUserServiceException extends RuntimeException {

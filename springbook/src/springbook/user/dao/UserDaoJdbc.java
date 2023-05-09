@@ -9,8 +9,6 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
-import com.mysql.cj.exceptions.MysqlErrorNumbers;
-
 import springbook.user.domain.Level;
 import springbook.user.domain.User;
 import springbook.user.exception.DuplicationIdException;

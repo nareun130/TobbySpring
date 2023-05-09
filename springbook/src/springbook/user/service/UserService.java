@@ -13,10 +13,8 @@ public interface UserService {
 	void deleteAll();
 
 	void update(User user);
-
 	@Transactional(readOnly = true)
 	User get(String id);
-
 	@Transactional(readOnly = true)
 	List<User> getAll();
 
