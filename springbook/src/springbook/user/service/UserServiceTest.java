@@ -232,6 +232,13 @@ public class UserServiceTest {
 		}
 	}
 
+	@Test
+	public void transactionSync() {
+		userService.deleteAll();
+		
+		userDao.add(users.get(0));
+		userDao.add(users.get(1));
+	}
 	static class TestUserServiceException extends RuntimeException {
 	}
 
