@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,26 +36,20 @@ import springbook.user.domain.User;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "/test-applicationContext.xml")
 public class UserServiceTest {
-
-	@Autowired
-	PlatformTransactionManager transactionManager;
-
-	@Autowired
-	ApplicationContext context;
-
 	@Autowired
 	UserService userService;
 	@Autowired
-	UserService testUserService;// 같은 타입의 빈이 두개 존재 -> 필드 이름을 기준으로 주입될 빈이 결정됨.
-	// 자동 프록시 생성기에 의해 트랜잭션 부가기능이 testUserService 빈에 적용됐는지를 확인하는 것이 목적
-
+	UserService testUserService;
 	@Autowired
 	UserDao userDao;
-
 	@Autowired
 	MailSender mailSender;
+	@Autowired
+	PlatformTransactionManager transactionManager;
+	@Autowired
+	ApplicationContext context;
 
-	List<User> users;
+	List<User> users; // test fixture
 
 	@Before
 	public void setUp() {
@@ -68,7 +61,6 @@ public class UserServiceTest {
 				new User("green", "오민규", "p5", "user5@ksug.org", Level.GOLD, 100, Integer.MAX_VALUE));
 	}
 
-	// MockUserDao를 사용해서 만든 고립된 테스트
 	@Test
 	public void upgradeLevels() throws Exception {
 		UserServiceImpl userServiceImpl = new UserServiceImpl();
@@ -97,7 +89,6 @@ public class UserServiceTest {
 		assertThat(updated.getLevel(), is(expectedLevel));
 	}
 
-	// 테스트용 UserDao 목오브젝트
 	static class MockUserDao implements UserDao {
 		private List<User> users;
 		private List<User> updated = new ArrayList<User>();
@@ -110,70 +101,54 @@ public class UserServiceTest {
 			return this.updated;
 		}
 
-		@Override
+		public List<User> getAll() {
+			return this.users;
+		}
+
+		public void update(User user) {
+			updated.add(user);
+		}
+
 		public void add(User user) {
 			throw new UnsupportedOperationException();
 		}
 
-		@Override
-		public User get(String id) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public List<User> getAll() {// 스텁 기능 제공
-			return this.users;
-		}
-
-		@Override
 		public void deleteAll() {
 			throw new UnsupportedOperationException();
 		}
 
-		@Override
-		public int getCount() {
+		public User get(String id) {
 			throw new UnsupportedOperationException();
 		}
 
-		@Override
-		public void update(User user) {// 목 오브젝트 기능 제공
-			updated.add(user);
-
+		public int getCount() {
+			throw new UnsupportedOperationException();
 		}
 	}
 
 	static class MockMailSender implements MailSender {
-		// UserService로부터 전송 요청을 받은 메일 주소를 저장해두고 이를 읽을 수 있게 함.
 		private List<String> requests = new ArrayList<String>();
 
 		public List<String> getRequests() {
 			return requests;
 		}
 
-		@Override
 		public void send(SimpleMailMessage mailMessage) throws MailException {
-			requests.add(mailMessage.getTo()[0]);// 전송 요청을 받은 이메일 주소를 저장해둠.
-			// 간단하게 첫 번째 수신자 메일 주소만 저장
+			requests.add(mailMessage.getTo()[0]);
 		}
 
-		@Override
 		public void send(SimpleMailMessage[] mailMessage) throws MailException {
-
 		}
-
 	}
 
-	// Mockito를 적용한 테스트 코드
 	@Test
-	public void mockUpgradeLevels() {
+	public void mockUpgradeLevels() throws Exception {
 		UserServiceImpl userServiceImpl = new UserServiceImpl();
 
-		// 다이내믹한 목 오브젝트 생서과 메소드의 리턴 값 설정, DI까지
 		UserDao mockUserDao = mock(UserDao.class);
 		when(mockUserDao.getAll()).thenReturn(this.users);
 		userServiceImpl.setUserDao(mockUserDao);
 
-		// 리턴 값이 없는 메소드를 가진 목 오브젝트
 		MailSender mockMailSender = mock(MailSender.class);
 		userServiceImpl.setMailSender(mockMailSender);
 
@@ -193,7 +168,6 @@ public class UserServiceTest {
 		assertThat(mailMessages.get(1).getTo()[0], is(users.get(3).getEmail()));
 	}
 
-	// checkLevel의 중복 작업을 줄여줄 메서드
 	private void checkLevelUpgraded(User user, boolean upgraded) {
 		User userUpdate = userDao.get(user.getId());
 		if (upgraded) {
@@ -207,7 +181,7 @@ public class UserServiceTest {
 	public void add() {
 		userDao.deleteAll();
 
-		User userWithLevel = users.get(4);
+		User userWithLevel = users.get(4); // GOLD 레벨
 		User userWithoutLevel = users.get(0);
 		userWithoutLevel.setLevel(null);
 
@@ -219,47 +193,21 @@ public class UserServiceTest {
 
 		assertThat(userWithLevelRead.getLevel(), is(userWithLevel.getLevel()));
 		assertThat(userWithoutLevelRead.getLevel(), is(Level.BASIC));
-
 	}
 
-	@Test // 스프링 컨텍스트의 빈 설정을 변경하지 않으므로 @DirtiesContext 애노테이션 제거. 모든 테스트를 위한 DI 작업은 설정파일을
-			// 통해 서버에서 진행되므로 테스트 코드 자체는 단순해짐.
-	public void upgradeAllOrNothing() throws Exception {
-
+	@Test
+	public void upgradeAllOrNothing() {
 		userDao.deleteAll();
 		for (User user : users)
 			userDao.add(user);
 
 		try {
 			testUserService.upgradeLevels();
-			fail("TestUserServiceException expected");// upgradeLevels가 정상적으로 종료되면 fail때문에 테스트가 실패할 것
-
+			fail("TestUserServiceException expected");
 		} catch (TestUserServiceException e) {
-
 		}
+
 		checkLevelUpgraded(users.get(1), false);
-	}
-
-	// 테스트용 서비스를 내부 클래스로 구현 -> 수정함.
-	static class TestUserService extends UserServiceImpl {
-		private String id = "madnite1"; // 테스트 픽스처의 users(3)의 id값을 고정시킴.
-
-		protected void upgradeLevel(User user) {
-			if (user.getId().equals(this.id))
-				throw new TestUserServiceException();// 지정된 id의 User 오브젝트가 발견되면 예외를 던져서 작업을 강제로 중단시킴.
-			super.upgradeLevel(user);
-		}
-
-		public List<User> getAll() {
-
-			// 읽기 전용 트랜잭션 대상인 get으로 시작하는 메소드를 오버라이드한다.
-			for (User user : super.getAll()) {
-				// 강제로 쓰기를 시도. 여기서 읽기전용속성으로 인한 예외 발생해야함.
-				super.update(user);
-			}
-			// 메소드가 끝나기 전에 예외가 발생해야 하니 리턴값은 별의미 없음
-			return null;
-		}
 	}
 
 	@Test(expected = TransientDataAccessResourceException.class)
@@ -267,9 +215,24 @@ public class UserServiceTest {
 		testUserService.getAll();
 	}
 
-	// 테스트용 예외
-	static class TestUserServiceException extends RuntimeException {
+	static class TestUserService extends UserServiceImpl {
+		private String id = "madnite1"; // users(3).getId()
 
+		protected void upgradeLevel(User user) {
+			if (user.getId().equals(this.id))
+				throw new TestUserServiceException();
+			super.upgradeLevel(user);
+		}
+
+		public List<User> getAll() {
+			for (User user : super.getAll()) {
+				super.update(user);
+			}
+			return null;
+		}
+	}
+
+	static class TestUserServiceException extends RuntimeException {
 	}
 
 }
