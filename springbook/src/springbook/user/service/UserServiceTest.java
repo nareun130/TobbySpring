@@ -28,6 +28,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import springbook.user.dao.UserDao;
 import springbook.user.domain.Level;
@@ -234,11 +236,24 @@ public class UserServiceTest {
 
 	@Test
 	public void transactionSync() {
-		userService.deleteAll();
 		
+		//트랜잭션 정의의 기본값 사용
+		DefaultTransactionDefinition txDefinition = new DefaultTransactionDefinition();
+		
+		//트랜잭션 매니저에게 트랜잭션 요청. 기존에 시작된 트랜잭션이 없음 -> 새로운 트랜잭션 시작하고 정보를 돌려줌.
+		//동시에 만들어진 트랜잭션을 다른곳에서도 사용할 수 있도록 동기화 시킴.
+		TransactionStatus txStatus = transactionManager.getTransaction(txDefinition);
+		
+		// 앞에서 만들어진 트랜잭션에 모두 참여
+		userService.deleteAll();
 		userDao.add(users.get(0));
 		userDao.add(users.get(1));
+		
+		//앞에서 시작한 트랜잭션을 커밋
+		transactionManager.commit(txStatus);
 	}
+	
+	
 	static class TestUserServiceException extends RuntimeException {
 	}
 
