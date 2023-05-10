@@ -28,6 +28,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -237,10 +238,8 @@ public class UserServiceTest {
 	}
 
 	// 롤백 테스트
-	//테스트 메소드나 클래스에서 사용하는 @Transactional은 기본적으로 트랜잭션을 강제로 롤백시킴.
+	// 테스트 메소드나 클래스에서 사용하는 @Transactional은 기본적으로 트랜잭션을 강제로 롤백시킴.
 	@Test
-	@Transactional
-	@Rollback(false)
 	public void transactionSync() {
 
 		userService.deleteAll();
