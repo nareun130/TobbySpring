@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema"
-            targetNamespace ="http://www.epril.com/sqlmap"
-    xmlns:tns="http://www.epril.com/sqlmap" elementFormDefault="qualified">
-    <!-- sqlmap에 대한 정의 -->
-    <element name="sqlmap">
-        <complexType>
-            <sequence>
-                <element name="sql" maxOccurs="unbounded" type="tns:sqlType"/>
-            </sequence>
-        </complexType>
-    </element>
-    <!-- sql에 대한 정의 -->
-    <complexType name="sqlType">
-        <simpleContent>
-            <extension base="string">
-            <!-- 검색을 위한 key 값 -->
-                <attribute name="key" use="required" type="string"/>
-            </extension>
-        </simpleContent>
-    </complexType>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.epril.com/sqlmap"
+	xmlns:tns="http://www.epril.com/sqlmap" elementFormDefault="qualified">
+	<!-- sqlmap 엘리먼트에 대한 정의 -->
+	<element name="sqlmap">
+		<complexType>
+			<sequence>
+				<!-- maxOcuurs : 필요한 개수만큼 <sql>을 포함할 수 있게 함. -->
+				<element name="sql" maxOccurs="unbounded" type="tns:sqlType" />
+			</sequence>
+		</complexType>
+	</element>
+	<!-- <sql>에 대한 정의 시작-->
+	<complexType name="sqlType">
+		<simpleContent>
+			<extension base="string">
+				<!-- 검색을 위한 key 값을 <sql>의 key 애트리뷰트에 넣음 -->
+				<attribute name="key" use="required" type="string" />
+			</extension>
+		</simpleContent>
+	</complexType>
 </schema>
