@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -13,9 +14,15 @@ import springbook.user.sqlservice.jaxb.SqlType;
 import springbook.user.sqlservice.jaxb.Sqlmap;
 
 public class XmlSqlService implements SqlService {
-	private Map<String, String> sqlMap = new HashMap<String, String>();
+	private String sqlmapFile;
 
-	public XmlSqlService() {
+	public void setSqlmapFile(String sqlmapFile) {
+		this.sqlmapFile = sqlmapFile;
+	}
+
+	// 생성자 대신 사용할 초기화 메소드
+	@PostConstruct
+	public void loadSql() {
 		String contextPath = Sqlmap.class.getPackage().getName();
 		try {
 			JAXBContext context = JAXBContext.newInstance(contextPath);
@@ -29,6 +36,12 @@ public class XmlSqlService implements SqlService {
 		} catch (JAXBException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private Map<String, String> sqlMap = new HashMap<String, String>();
+
+	public XmlSqlService() {
+
 	}
 
 	@Override
