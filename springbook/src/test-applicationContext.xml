@@ -33,18 +33,6 @@
 
 	<!-- 코드의 어노테이션을 이용해서 부가적인 빈 설정 또는 초기화 작업을 해주는 후처리기를 등록 -->
 	<context:annotation-config />
-	<!-- <aop:config> <aop:advisor advice-ref="transactionAdvice" pointcut="bean(*Service)" 
-		/> </aop:config> <tx:advice id="transactionAdvice"> <tx:attributes> <tx:method 
-		name="get*" read-only="true"/> <tx:method name="*" /> </tx:attributes> </tx:advice> -->
-
-	<!-- <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" 
-		/> <bean id="transactionAdvice" class="springbook.user.service.TransactionAdvice"> 
-		<property name="transactionManager" ref="transactionManager" /> </bean> <bean 
-		id="transactionPointcut" class="org.springframework.aop.aspectj.AspectJExpressionPointcut"> 
-		<property name="expression" value="execution(* *..*ServiceImpl.upgrade*(..))" 
-		/> </bean> <bean id="transactionAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor"> 
-		<property name="advice" ref="transactionAdvice" /> <property name="pointcut" 
-		ref="transactionPointcut" /> </bean> -->
 
 	<!-- application components -->
 	<bean id="userDao" class="springbook.user.dao.UserDaoJdbc">
@@ -52,14 +40,16 @@
 		<property name="sqlService" ref="sqlService" />
 	</bean>
 
-	<!-- 디폴트 의존관계 빈의 설정 -->
 	<bean id="sqlService"
-		class="springbook.user.sqlservice.DefaultSqlService" />
-	<!-- <bean id="sqlService" class="springbook.user.sqlservice.BaseSqlService"> 
-		<property name="sqlReader" ref="sqlReader" /> <property name="sqlRegistry" 
-		ref="sqlRegistry" /> </bean> <bean id="sqlReader" class="springbook.user.sqlservice.JaxbXmlSqlReader"> 
-		<property name="sqlmapFile" value="sqlmap.xml" /> </bean> <bean id="sqlRegistry" 
-		class="springbook.user.sqlservice.HashMapSqlRegistry" /> -->
+		class="springbook.user.sqlservice.OxmSqlService">
+		<property name="unmarshaller" ref="unmarshaller" />
+	</bean>
+
+	<bean id="unmarshaller"
+		class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+		<property name="contextPath"
+			value="springbook.user.sqlservice.jaxb" />
+	</bean>
 
 	<bean id="userService"
 		class="springbook.user.service.UserServiceImpl">
