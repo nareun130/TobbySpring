@@ -25,7 +25,7 @@ import springbook.user.sqlservice.jaxb.Sqlmap;
 public class OxmTest {
 	@Autowired
 	Unmarshaller unmarshaller;
-
+	
 	@Test
 	public void unmarshallSqlMap() throws XmlMappingException, IOException {
 		Source xmlSource = new StreamSource(getClass().getResourceAsStream("sqlmap.xml"));
