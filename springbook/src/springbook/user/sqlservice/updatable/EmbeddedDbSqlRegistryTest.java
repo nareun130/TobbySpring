@@ -18,7 +18,7 @@ public class EmbeddedDbSqlRegistryTest extends AbstractUpdatableSqlRegistryTest 
 				.addScript("classpath:springbook/user/sqlservice/updatable/sqlRegistrySchema.sql").build();
 
 		EmbeddedDbSqlRegistry embeddedDbSqlRegistry = new EmbeddedDbSqlRegistry();
-		embeddedDbSqlRegistry.setDatalSource(db);
+		embeddedDbSqlRegistry.setDataSource(db);
 		return embeddedDbSqlRegistry;
 	}
 

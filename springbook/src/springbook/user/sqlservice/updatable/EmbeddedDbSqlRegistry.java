@@ -14,7 +14,7 @@ import springbook.user.sqlservice.UpdatableSqlRegistry;
 public class EmbeddedDbSqlRegistry implements UpdatableSqlRegistry {
 	SimpleJdbcTemplate jdbc;
 
-	public void setDatalSource(DataSource dataSource) {
+	public void setDataSource(DataSource dataSource) {
 		jdbc = new SimpleJdbcTemplate(dataSource);// DataSource를 DI받아 SimpleJdbcTemplate형태로 저장해두고 사용함.
 	}
 
