@@ -13,43 +13,42 @@
 		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd 
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 						
-	<context:annotation-config />						
 						
 	<!-- db -->						
-	<bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
+	<!-- <bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
 		<property name="driverClass" value="com.mysql.jdbc.Driver" />
 		<property name="url" value="jdbc:mysql://localhost/springbook?characterEncoding=UTF-8" />
 		<property name="username" value="spring" />
 		<property name="password" value="book" />
-	</bean>
-	
+	</bean> -->
+	<!-- 
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<property name="dataSource" ref="dataSource" />  
 	</bean>
-	
+	 -->
 	<!-- sql service -->
-	<bean id="sqlService" class="springbook.user.sqlservice.OxmSqlService">
+	<!-- <bean id="sqlService" class="springbook.user.sqlservice.OxmSqlService">
 		<property name="unmarshaller" ref="unmarshaller" /> 
 		<property name="sqlRegistry" ref="sqlRegistry" />
 	</bean>
-	
-	<bean id="sqlRegistry" class="springbook.user.sqlservice.updatable.EmbeddedDbSqlRegistry">
+	 -->
+	<!-- <bean id="sqlRegistry" class="springbook.user.sqlservice.updatable.EmbeddedDbSqlRegistry">
 		<property name="dataSource" ref="embeddedDatabase" />
-	</bean>
+	</bean> -->
 
-	<jdbc:embedded-database id="embeddedDatabase" type="HSQL">
+	<!-- <jdbc:embedded-database id="embeddedDatabase" type="HSQL">
 		<jdbc:script location="classpath:springbook/user/sqlservice/updatable/sqlRegistrySchema.sql"/>
-	</jdbc:embedded-database>
+	</jdbc:embedded-database> -->
 		
-	<bean id="unmarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+<!-- 	<bean id="unmarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
 		<property name="contextPath" value="springbook.user.sqlservice.jaxb" />
-	</bean>
+	</bean> -->
 
 	<!-- aop -->
-	<tx:annotation-driven />
+	<!-- <tx:annotation-driven /> -->
 	
 	<!--  application components -->
-	<bean id="userDao" class="springbook.user.dao.UserDaoJdbc">
+	<!-- <bean id="userDao" class="springbook.user.dao.UserDaoJdbc">
 		<property name="dataSource" ref="dataSource" />
 		<property name="sqlService" ref="sqlService" />
 	</bean>
@@ -61,5 +60,5 @@
 	
 	<bean id="testUserService" class="springbook.user.service.UserServiceTest$TestUserService" parent="userService" />
 
-	<bean id="mailSender" class="springbook.user.service.DummyMailSender" />
+	<bean id="mailSender" class="springbook.user.service.DummyMailSender" /> -->
 </beans>
