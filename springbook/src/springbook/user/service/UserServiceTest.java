@@ -20,11 +20,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -36,9 +38,13 @@ import springbook.user.domain.Level;
 import springbook.user.domain.User;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { TestAppContext.class, AppContext.class })
+@ContextConfiguration(classes = AppContext.class)
+@ActiveProfiles("test")
 public class UserServiceTest {
 
+	// 거의 대부분의 스프링 컨테이너가 이클래스를 이용해 빈을 등록하고 관리함
+	@Autowired
+	DefaultListableBeanFactory bf;
 	@Autowired
 	UserService userService;
 	@Autowired
@@ -177,6 +183,15 @@ public class UserServiceTest {
 			assertThat(userUpdate.getLevel(), is(user.getLevel().nextLevel()));
 		} else {
 			assertThat(userUpdate.getLevel(), is(user.getLevel()));
+		}
+	}
+
+	// 테스트 컨텍스트에 등록된 빈 이름과 빈의 클래스를 모두 얻을 수 있음.
+	// 어떤 프로파일이 활성화 되어있냐에 따라 빈이 달라지는 걸 확인 가능.
+	@Test
+	public void beans() {
+		for (String n : bf.getBeanDefinitionNames()) {
+			System.out.println(n + "\t " + bf.getBean(n).getClass().getName());
 		}
 	}
 

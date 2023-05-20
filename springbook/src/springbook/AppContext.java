@@ -15,6 +15,7 @@ import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.HSQL;
 import org.springframework.mail.MailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -37,7 +38,7 @@ import springbook.user.sqlservice.updatable.EmbeddedDbSqlRegistry;
 @Configuration
 @EnableTransactionManagement
 @ComponentScan(basePackages = "springbook.user")
-@Import(SqlServiceContext.class)
+@Import({ SqlServiceContext.class, TestAppContext.class, ProductionAppContext.class })
 public class AppContext {
 	// DB 연결 & 트랜잭션
 	@Bean
@@ -58,10 +59,5 @@ public class AppContext {
 		tm.setDataSource(dataSource());
 		return tm;
 	}
-
-	// 애플리케이션 로직 & 테스트 빈
-
-	@Autowired
-	UserDao userDao;
 
 }

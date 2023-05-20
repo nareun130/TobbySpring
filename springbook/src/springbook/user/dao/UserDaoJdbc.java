@@ -18,7 +18,7 @@ import springbook.user.domain.User;
 import springbook.user.exception.DuplicationIdException;
 import springbook.user.sqlservice.SqlService;
 
-@Repository
+@Repository("userDao")//userDao를 붙여주지 않으면 UserDaoTest가 실행되지 않는다.
 public class UserDaoJdbc implements UserDao {
 
 	@Autowired
