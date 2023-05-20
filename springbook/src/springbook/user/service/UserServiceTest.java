@@ -37,6 +37,7 @@ import springbook.user.domain.User;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = TestApplicationContext.class)
 public class UserServiceTest {
+	
 	@Autowired
 	UserService userService;
 	@Autowired

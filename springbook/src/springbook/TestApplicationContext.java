@@ -6,6 +6,7 @@ import javax.sql.DataSource;
 import org.hsqldb.Database;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -34,6 +35,7 @@ import springbook.user.sqlservice.updatable.EmbeddedDbSqlRegistry;
 //DO 메타정보로 사용될 TestApplicationContext클래스
 @Configuration
 @EnableTransactionManagement
+@ComponentScan(basePackages = "springbook.user")
 public class TestApplicationContext {
 	// DB 연결 & 트랜잭션
 	@Bean
@@ -56,29 +58,14 @@ public class TestApplicationContext {
 	}
 
 	// 애플리케이션 로직 & 테스트 빈
-	@Autowired
-	SqlService sqlService;
+	
+	@Autowired UserDao userDao;
 
-	@Bean
-	public UserDao userDao() {
-		UserDaoJdbc dao = new UserDaoJdbc();
-		dao.setDataSource(dataSource());
-		dao.setSqlService(this.sqlService);
-		return dao;
-	}
-
-	@Bean
-	public UserService userService() {
-		UserServiceImpl service = new UserServiceImpl();
-		service.setUserDao(userDao());
-		service.setMailSender(mailSender());
-		return service;
-	}
 
 	@Bean
 	public UserService testUserService() {
 		TestUserService testService = new TestUserService();
-		testService.setUserDao(userDao());
+		testService.setUserDao(this.userDao);
 		testService.setMailSender(mailSender());
 		return testService;
 	}
@@ -96,7 +83,6 @@ public class TestApplicationContext {
 		sqlService.setSqlRegistry(sqlRegistry());
 		return sqlService;
 	}
-
 
 	public DataSource embeddedDatabase() {
 		return new EmbeddedDatabaseBuilder().setName("embeddedDatabase").setType(HSQL)
