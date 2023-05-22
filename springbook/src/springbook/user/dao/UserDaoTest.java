@@ -79,7 +79,7 @@ public class UserDaoTest {
 		dao.add(user3);
 		assertThat(dao.getCount(), is(3));
 	}
-
+ 
 	// expected를 추가함으로 예외가 발생하면 테스트가 성공함
 	@Test(expected = EmptyResultDataAccessException.class)
 	public void getUserFailure() throws SQLException, ClassNotFoundException {

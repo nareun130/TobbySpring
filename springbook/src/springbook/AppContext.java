@@ -10,6 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
@@ -38,7 +39,7 @@ import springbook.user.sqlservice.updatable.EmbeddedDbSqlRegistry;
 @Configuration
 @EnableTransactionManagement
 @ComponentScan(basePackages = "springbook.user")
-@Import({ SqlServiceContext.class, TestAppContext.class, ProductionAppContext.class })
+@Import(SqlServiceContext.class)
 public class AppContext {
 	// DB 연결 & 트랜잭션
 	@Bean
@@ -58,6 +59,33 @@ public class AppContext {
 		DataSourceTransactionManager tm = new DataSourceTransactionManager();
 		tm.setDataSource(dataSource());
 		return tm;
+	}
+
+	@Configuration
+	@Profile("production")
+	public static class ProductionAppContext {
+		@Bean
+		public MailSender mailSender() {
+			JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+			mailSender.setHost("mail.mycompony.com");
+			return mailSender;
+		}
+
+	}
+
+	@Configuration
+	@Profile("test")
+	public static class TestAppContext {
+
+		@Bean
+		public UserService testUserService() {
+			return new TestUserService();
+		}
+
+		@Bean
+		public MailSender mailSender() {
+			return new DummyMailSender();
+		}
 	}
 
 }
