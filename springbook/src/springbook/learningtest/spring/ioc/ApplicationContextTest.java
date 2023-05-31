@@ -9,6 +9,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 
 import springbook.learningtest.spring.ioc.bean.Hello;
@@ -56,9 +58,26 @@ public class ApplicationContextTest {
 
 		Hello hello = ac.getBean("hello", Hello.class);
 		hello.print();
+
+		// Hello 클래스의 print()메소드는 DI 된 Printer 타입의 오브젝트에게 요청해서 인사말을 출력
+		// 결과를 스트링으로 저장해두는 printer빈을 통해 확인
+		assertThat(ac.getBean("printer").toString(), is("Hello Spring"));
+	}
+
+	@Test
+	public void genericApplicationContext() {
+		GenericApplicationContext ac = new GenericApplicationContext();
+
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(ac);
+		//기본적으로 클래스 패스로 정의된 리소스로부터 파일을 읽는다.(classpath: || file: || http: ) 
+		reader.loadBeanDefinitions("springbook/learningtest/spring/ioc/genericApplicationContext.xml");
 		
-		//Hello 클래스의 print()메소드는 DI 된 Printer 타입의 오브젝트에게 요청해서 인사말을 출력
-		//결과를 스트링으로 저장해두는 printer빈을 통해 확인
+
+		ac.refresh();//모든 메타정보가 등록이 완료됐으니 애플리케이션을 초기화
+
+		Hello hello = ac.getBean("hello", Hello.class);
+		hello.print();
+
 		assertThat(ac.getBean("printer").toString(), is("Hello Spring"));
 	}
 }
