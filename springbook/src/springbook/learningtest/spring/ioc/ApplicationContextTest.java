@@ -10,13 +10,21 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 import springbook.learningtest.spring.ioc.bean.Hello;
+import springbook.learningtest.spring.ioc.bean.Printer;
 import springbook.learningtest.spring.ioc.bean.StringPrinter;
 
 public class ApplicationContextTest {
+
+	// 현재 클래스의 패키지 정보를 클래스패스 형식으로 만들어서 미리 저장
+	private String basePath = StringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(getClass())) + "/";
 
 	@Test
 	public void registerBean() {
@@ -69,15 +77,39 @@ public class ApplicationContextTest {
 		GenericApplicationContext ac = new GenericApplicationContext();
 
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(ac);
-		//기본적으로 클래스 패스로 정의된 리소스로부터 파일을 읽는다.(classpath: || file: || http: ) 
+		// 기본적으로 클래스 패스로 정의된 리소스로부터 파일을 읽는다.(classpath: || file: || http: )
 		reader.loadBeanDefinitions("springbook/learningtest/spring/ioc/genericApplicationContext.xml");
-		
 
-		ac.refresh();//모든 메타정보가 등록이 완료됐으니 애플리케이션을 초기화
+		ac.refresh();// 모든 메타정보가 등록이 완료됐으니 애플리케이션을 초기화
 
 		Hello hello = ac.getBean("hello", Hello.class);
 		hello.print();
 
 		assertThat(ac.getBean("printer").toString(), is("Hello Spring"));
 	}
+
+	@Test
+	public void contextHierachy() {
+		// 부모 컨텍스트 생성
+		ApplicationContext parent = new GenericXmlApplicationContext(basePath + "parentContext.xml");
+
+		// 자식 컨텍스트 생성 -> 부모 컨택스트를 지정해주면서 생성
+		GenericApplicationContext child = new GenericApplicationContext(parent);
+
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(child);
+		reader.loadBeanDefinitions(basePath + "childContext.xml");
+		child.refresh();
+
+		// childContext.xml에는 printer라는 빈이 존재하지 않기 때문에 부모 컨텍스트로 검색이 넘어감.
+		Printer printer = child.getBean("printer", Printer.class);
+		assertThat(printer, is(notNullValue()));
+
+		Hello hello = child.getBean("hello", Hello.class);
+		assertThat(hello, is(notNullValue()));
+
+		hello.print();
+		assertThat(printer.toString(), is("Hello Child"));// getBean()으로 가져온 hello 빈은 자식 컨텍스트에 존재하는 것
+
+	}
+
 }
