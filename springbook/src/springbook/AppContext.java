@@ -35,8 +35,7 @@ import springbook.user.service.UserServiceTest.TestUserService;
 @ComponentScan(basePackages = "springbook.user")
 @EnableSqlService
 @PropertySource("/database.properties")
-public class AppContext implements SqlMapConfig{
-
+public class AppContext implements SqlMapConfig {
 
 	@Value("${db.driverClass}")
 	Class<? extends Driver> driverClass;
@@ -48,10 +47,10 @@ public class AppContext implements SqlMapConfig{
 	String password;
 
 	// DB 연결 & 트랜잭션
-	
+
 	@Override
 	public Resource getSqlMapResource() {
-		return new ClassPathResource("sqlmap.xml",UserDao.class);
+		return new ClassPathResource("sqlmap.xml", UserDao.class);
 	}
 
 	@Bean
@@ -103,6 +102,5 @@ public class AppContext implements SqlMapConfig{
 			return new DummyMailSender();
 		}
 	}
-
 
 }
